@@ -8,7 +8,9 @@ import { FoundItemsPage } from '../pages/FoundItemsPage'
 import { GuidePage } from '../pages/GuidePage'
 import { HomePage } from '../pages/HomePage'
 import { LostReportPage } from '../pages/LostReportPage'
+import { DemoMatchResultsPage, ReportMatchResultsPage } from '../pages/MatchResultsPage'
 import { PendingPage } from '../pages/PendingPage'
+import { getMatchReportId, MATCH_DEMO_PATH } from './matchRoutes'
 
 function renderPage(pathname: string, params: URLSearchParams) {
   switch (pathname) {
@@ -29,6 +31,8 @@ function renderPage(pathname: string, params: URLSearchParams) {
       )
     case '/report/lost':
       return <LostReportPage />
+    case MATCH_DEMO_PATH:
+      return <DemoMatchResultsPage params={params} />
     case '/report/found':
       return <PendingPage title="습득물 등록" message="습득물 등록 양식을 준비 중입니다. 등록할 때 습득한 건물과 사진이 필요합니다." />
     case '/my':
@@ -48,6 +52,9 @@ function renderPage(pathname: string, params: URLSearchParams) {
         </AuthPage>
       )
     default: {
+      const reportId = getMatchReportId(pathname)
+      if (reportId) return <ReportMatchResultsPage key={reportId} reportId={reportId} />
+
       const item = foundItems.find(({ id }) => pathname === `/found/${id}`)
 
       return item

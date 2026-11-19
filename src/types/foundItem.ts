@@ -6,6 +6,7 @@ export interface FoundItem {
   category: FoundCategory
   building: string
   locationDetail?: string
+  foundAt: string
   registeredAt: string
   image: string
 }

@@ -14,7 +14,7 @@ export function HomePage() {
         <ActionCards />
         <CategoryNavigation />
         <ProcessOverview />
-        <RecentFoundItems items={foundItems} />
+        <RecentFoundItems items={foundItems.slice(0, 3)} />
       </div>
     </main>
   )

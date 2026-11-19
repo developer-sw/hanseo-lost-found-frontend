@@ -1,10 +1,11 @@
 import { CATEGORY_LABELS, formatRegisteredAt } from '../data/foundItems'
 import type { FoundItem } from '../types/foundItem'
 import { Icon } from './Icon'
+import { KoreanDateTime } from './KoreanDateTime'
 import '../styles/home-sections.css'
 
-export function FoundItemCard({ item }: { item: FoundItem }) {
-  const { id, name, category, building, locationDetail, registeredAt, image } = item
+export function FoundItemCard({ item, showFoundAt = false }: { item: FoundItem; showFoundAt?: boolean }) {
+  const { id, name, category, building, locationDetail, foundAt, registeredAt, image } = item
   const location = locationDetail ? `${building} ${locationDetail}` : building
 
   return (
@@ -19,7 +20,12 @@ export function FoundItemCard({ item }: { item: FoundItem }) {
         </div>
         <div className="found-item-card__meta">
           <Icon name="clock" size={16} />
-          <time dateTime={registeredAt}>{formatRegisteredAt(registeredAt)}</time>
+          {showFoundAt ? (
+            <>
+              <span className="sr-only">습득 일시</span>
+              <KoreanDateTime value={foundAt} />
+            </>
+          ) : <time dateTime={registeredAt}>{formatRegisteredAt(registeredAt)}</time>}
         </div>
       </div>
     </a>

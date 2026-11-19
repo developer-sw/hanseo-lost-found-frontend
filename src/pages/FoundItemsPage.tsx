@@ -43,7 +43,7 @@ export function FoundItemsPage({ params }: { params: URLSearchParams }) {
         <h2 id="results-title">습득물 {results.length}건</h2>
         {results.length ? (
           <ul className="search-results-grid">
-            {results.map((item) => <li key={item.id}><FoundItemCard item={item} /></li>)}
+            {results.map((item) => <li key={item.id}><FoundItemCard item={item} showFoundAt /></li>)}
           </ul>
         ) : (
           <div className="page-panel">

@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
+import { getMatchResultPath, MATCH_DEMO_PATH } from '../app/matchRoutes'
 import { campusBuildings } from '../data/campusBuildings'
 import { CATEGORY_LABELS } from '../data/categories'
 import { lostReportService } from '../services/lostReports'
@@ -81,8 +82,7 @@ export function LostReportForm() {
         setFeedback('데모 미리보기입니다. 입력한 내용은 서버에 저장되지 않았습니다.')
         requestAnimationFrame(() => reviewTitleRef.current?.focus())
       } else {
-        // Use the server-issued report ID to link to S4 when its route is implemented.
-        setFeedback('신고가 접수되었습니다. 자동 매칭 화면은 준비 중입니다.')
+        window.location.assign(getMatchResultPath(result.reportId))
       }
     } catch {
       setFeedback('신고를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
@@ -193,6 +193,7 @@ export function LostReportForm() {
               </div>
             ))}
           </dl>
+          <a className="secondary-link report-review__demo-link" href={MATCH_DEMO_PATH}>데모 매칭 결과 보기</a>
         </section>
       )}
 
