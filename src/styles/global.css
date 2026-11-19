@@ -1,22 +1,152 @@
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 45 920;
+}
+
 :root {
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
+  color-scheme: light;
+  color: var(--text);
+  background: #fff;
+  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: 100%;
+  line-height: 1.5;
   word-break: keep-all;
   overflow-wrap: anywhere;
+  --green: #005b38;
+  --green-dark: #064d32;
+  --text: #171c19;
+  --muted: #4b5450;
+  --line: #e6ede8;
+  --mint: #edf7ee;
+  --gutter: clamp(1.5rem, 4vw, 3.5rem);
 }
 
-body {
-  margin: 0;
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+h1, h2, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button, input, select { color: inherit; font: inherit; }
+button { cursor: pointer; }
+img { display: block; max-width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 4px;
 }
 
-main {
-  max-inline-size: 48rem;
+.site-container {
+  width: min(calc(100% - 2 * var(--gutter)), 84.5rem);
   margin-inline: auto;
-  padding: clamp(2rem, 8vw, 5rem) 1.25rem;
 }
 
-h1 {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 20;
+  inset: 0 auto auto 1rem;
+  padding: 0.65rem 1rem;
+  transform: translateY(-160%);
+  border-radius: 0.5rem;
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.skip-link:focus { transform: translateY(0.75rem); }
+
+.inner-page {
+  padding-block: clamp(1.4rem, 4vw, 3.5rem) 4rem;
+}
+
+.inner-page h1 { font-size: clamp(1.75rem, 4.5vw, 2.625rem); line-height: 1.2; letter-spacing: -0.045em; }
+.inner-page h2 { font-size: clamp(1.25rem, 3vw, 1.6rem); line-height: 1.3; letter-spacing: -0.025em; }
+.page-intro { margin-block: 0.75rem 1.5rem; color: var(--muted); }
+
+.page-panel {
+  padding: clamp(1.15rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: #f8fcf8;
+}
+
+.page-panel p { color: var(--muted); }
+.page-panel h1 + p, .page-panel h2 + p, .page-panel p + p { margin-top: 0.75rem; }
+.back-link { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 1.25rem; color: var(--green); font-weight: 700; }
+.page-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
+.handover-guide { margin-top: 1.5rem; scroll-margin-top: 1rem; }
+
+.primary-link, .secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  font-weight: 700;
+}
+
+.primary-link { background: var(--green); color: #fff; }
+.primary-link:hover { background: var(--green-dark); }
+.secondary-link { border-color: #cbe1d0; background: #fff; color: var(--green); }
+.secondary-link:hover { background: var(--mint); }
+
+.found-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 1rem;
+  scroll-margin-top: 1rem;
+}
+
+.found-filters label { display: grid; min-width: 0; gap: 0.35rem; font-size: 0.9375rem; font-weight: 700; }
+.found-filters input, .found-filters select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #cbe1d0;
+  border-radius: 0.65rem;
+  background: #fff;
+  font-weight: 500;
+}
+
+.search-results { margin-top: 1.75rem; }
+.search-results h2 { margin-bottom: 0.875rem; }
+.search-results .secondary-link { margin-top: 1rem; }
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
   margin: 0;
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  line-height: 1.35;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 1080px) {
+  .search-results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: clamp(0.875rem, 4.5vw, 1.5rem);
+    scrollbar-color: #cadacf #fff;
+    scrollbar-width: thin;
+  }
+  .inner-page { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
+  .found-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .found-filters label:first-child, .found-filters button { grid-column: 1 / -1; }
+  .search-results-grid { grid-template-columns: minmax(0, 1fr); }
 }
