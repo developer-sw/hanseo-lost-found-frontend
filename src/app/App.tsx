@@ -1,6 +1,9 @@
 import { Header } from '../components/Header'
+import { LoginForm } from '../components/LoginForm'
 import { MobileBottomNavigation } from '../components/MobileBottomNavigation'
+import { SignupForm } from '../components/SignupForm'
 import { foundItems } from '../data/foundItems'
+import { AuthPage } from '../pages/AuthPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
 import { GuidePage } from '../pages/GuidePage'
 import { HomePage } from '../pages/HomePage'
@@ -32,7 +35,17 @@ function renderPage(pathname: string, params: URLSearchParams) {
     case '/account':
       return params.get('tab') === 'notifications'
         ? <PendingPage title="알림" message="로그인과 알림 기능을 준비 중입니다." />
-        : <PendingPage title="로그인" message="학생 계정 로그인과 회원가입 화면을 준비 중입니다." />
+        : (
+          <AuthPage title="로그인" description="이용할 계정 유형을 선택해 주세요.">
+            <LoginForm />
+          </AuthPage>
+        )
+    case '/account/signup':
+      return (
+        <AuthPage title="학생 회원가입" description="학생 계정에 사용할 정보를 입력해 주세요.">
+          <SignupForm />
+        </AuthPage>
+      )
     default: {
       const item = foundItems.find(({ id }) => pathname === `/found/${id}`)
 
