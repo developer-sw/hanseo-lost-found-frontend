@@ -3,7 +3,7 @@ import earbudsCaseImage from '../assets/item-earbud-charging-case.webp'
 import walletImage from '../assets/item-wallet.webp'
 import tumblerImage from '../assets/item-tumbler.webp'
 import wirelessEarbudsImage from '../assets/item-wireless-earbuds.webp'
-import type { FoundItem } from '../types/foundItem'
+import type { FoundItem, FoundItemDetail } from '../types/foundItem'
 
 export { CATEGORY_LABELS } from './categories'
 
@@ -14,7 +14,7 @@ function hoursBeforeDemo(hours: number) {
   return new Date(demoStartedAt - hours * hourInMs).toISOString()
 }
 
-export const foundItems: FoundItem[] = [
+export const demoFoundItemDetails: readonly FoundItemDetail[] = [
   {
     id: 'airpods-pro',
     name: '에어팟 프로',
@@ -24,6 +24,8 @@ export const foundItems: FoundItem[] = [
     foundAt: '2026-11-17T05:40:00.000Z',
     registeredAt: hoursBeforeDemo(6),
     image: airpodsImage,
+    status: 'STORED',
+    description: '흰색 충전 케이스와 이어버드가 함께 있습니다.',
   },
   {
     id: 'black-wallet',
@@ -34,6 +36,8 @@ export const foundItems: FoundItem[] = [
     foundAt: '2026-11-18T01:30:00.000Z',
     registeredAt: hoursBeforeDemo(9),
     image: walletImage,
+    status: 'AWAITING_PICKUP',
+    description: '덮개에 금색 단추가 달린 검정색 지갑입니다.',
   },
   {
     id: 'tumbler',
@@ -44,6 +48,7 @@ export const foundItems: FoundItem[] = [
     foundAt: '2026-11-18T00:10:00.000Z',
     registeredAt: hoursBeforeDemo(12),
     image: tumblerImage,
+    status: 'CLAIMED',
   },
   {
     id: 'white-wireless-earbuds',
@@ -54,6 +59,8 @@ export const foundItems: FoundItem[] = [
     foundAt: '2026-11-18T02:15:00.000Z',
     registeredAt: hoursBeforeDemo(15),
     image: wirelessEarbudsImage,
+    status: 'CLAIM_REQUESTED',
+    description: '흰색 이어버드 두 개와 둥근 충전 케이스가 함께 있습니다.',
   },
   {
     id: 'black-bluetooth-earbud-case',
@@ -64,8 +71,17 @@ export const foundItems: FoundItem[] = [
     foundAt: '2026-11-16T07:20:00.000Z',
     registeredAt: hoursBeforeDemo(18),
     image: earbudsCaseImage,
+    status: 'STORED',
+    description: '검정색 충전 케이스이며 이어버드는 들어 있지 않습니다.',
   },
 ]
+
+export const foundItems: FoundItem[] = demoFoundItemDetails.map(({
+  status: _status,
+  description: _description,
+  claimEligibility: _claimEligibility,
+  ...item
+}) => item)
 
 const relativeTime = new Intl.RelativeTimeFormat('ko', { numeric: 'auto' })
 

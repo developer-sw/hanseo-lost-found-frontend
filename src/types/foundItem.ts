@@ -10,3 +10,19 @@ export interface FoundItem {
   registeredAt: string
   image: string
 }
+
+export type FoundItemStatus = 'STORED' | 'CLAIM_REQUESTED' | 'AWAITING_PICKUP' | 'CLAIMED'
+
+export type FoundItemClaimEligibility =
+  | { status: 'allowed' | 'sign-in-required' | 'own-item' | 'already-requested' | 'rejected' }
+  | { status: 'cancelled'; canReapply: boolean }
+
+export interface FoundItemDetail extends FoundItem {
+  status: FoundItemStatus
+  description?: string
+  claimEligibility?: FoundItemClaimEligibility
+}
+
+export type FoundItemDetailResult =
+  | { status: 'ready'; item: FoundItemDetail; source: 'demo' | 'api' }
+  | { status: 'not-found' | 'unavailable' | 'error' }

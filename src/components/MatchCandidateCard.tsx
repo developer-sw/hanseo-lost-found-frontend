@@ -1,6 +1,7 @@
 import { useId } from 'react'
-import { getMatchedFoundItemPath } from '../app/matchRoutes'
+import { getFoundItemPath } from '../app/foundItemRoutes'
 import { CATEGORY_LABELS } from '../data/categories'
+import type { MatchDemoScenario } from '../data/demoMatches'
 import type { MatchCandidate } from '../types/match'
 import { Icon } from './Icon'
 import { KoreanDateTime } from './KoreanDateTime'
@@ -9,13 +10,16 @@ interface MatchCandidateCardProps {
   candidate: MatchCandidate
   rank: number
   reportId?: string
-  isDemo?: boolean
+  demoScenario?: MatchDemoScenario
 }
 
-export function MatchCandidateCard({ candidate, rank, reportId, isDemo = false }: MatchCandidateCardProps) {
+export function MatchCandidateCard({ candidate, rank, reportId, demoScenario }: MatchCandidateCardProps) {
   const headingId = useId()
   const { name, category, image, building, locationDetail, foundAt, score, reasons } = candidate
   const visibleReasons = reasons?.filter((reason) => reason.trim().length > 0) ?? []
+  const detailHref = demoScenario
+    ? getFoundItemPath(candidate.id, { source: 'match-demo', scenario: demoScenario })
+    : getFoundItemPath(candidate.id, reportId ? { source: 'match', lostReportId: reportId } : undefined)
 
   return (
     <article className="match-candidate" aria-labelledby={headingId}>
@@ -30,7 +34,7 @@ export function MatchCandidateCard({ candidate, rank, reportId, isDemo = false }
             <p className="match-candidate__category">{CATEGORY_LABELS[category]}</p>
             <h3 id={headingId}>{name}</h3>
           </div>
-          <p className="match-score"><span>{isDemo ? '예시 매칭 점수' : '매칭 점수'}</span>{' '}<strong>{score}점</strong></p>
+          <p className="match-score"><span>{demoScenario ? '예시 매칭 점수' : '매칭 점수'}</span>{' '}<strong>{score}점</strong></p>
         </div>
 
         <dl className="match-candidate__meta">
@@ -55,7 +59,7 @@ export function MatchCandidateCard({ candidate, rank, reportId, isDemo = false }
       </div>
 
       <div className="match-candidate__actions">
-        <a className="primary-link" href={getMatchedFoundItemPath(candidate.id, reportId)} aria-describedby={headingId}>
+        <a className="primary-link" href={detailHref} aria-describedby={headingId}>
           상세보기 <Icon name="arrow-right" size={16} />
         </a>
         <button className="secondary-link match-candidate__claim" type="button" disabled>

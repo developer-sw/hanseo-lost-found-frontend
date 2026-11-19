@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MATCH_DEMO_PATH } from '../app/matchRoutes'
+import { getMatchDemoScenario, MATCH_DEMO_PATH } from '../app/matchRoutes'
 import { Hanbi } from '../components/Hanbi'
 import { Icon } from '../components/Icon'
 import { MatchCandidateCard } from '../components/MatchCandidateCard'
@@ -25,15 +25,15 @@ function DemoControls({ scenario }: { scenario: MatchDemoScenario }) {
   )
 }
 
-function MatchResultsPage({ state, demoScenario, onRetry }: {
+function MatchResultsPage({ state, reportId, demoScenario, onRetry }: {
   state: MatchViewState
+  reportId?: string
   demoScenario?: MatchDemoScenario
   onRetry?: () => void
 }) {
   const result = state.status === 'ready' ? state.result : undefined
   // Keep the supplied ranking. Exclude zero-point results before applying the display limit.
   const candidates = result?.candidates.filter(({ score }) => score > 0).slice(0, 3) ?? []
-  const reportId = result && 'reportId' in result && typeof result.reportId === 'string' ? result.reportId : undefined
   const isEmpty = state.status === 'ready' && candidates.length === 0
   const title = isEmpty ? '아직 비슷한 습득물이 없어요.' : candidates.length ? '비슷한 습득물을 찾았어요!' : '자동 매칭 결과'
   const intro = isEmpty
@@ -62,7 +62,7 @@ function MatchResultsPage({ state, demoScenario, onRetry }: {
           <ol className="match-grid">
             {candidates.map((candidate, index) => (
               <li key={candidate.id}>
-                <MatchCandidateCard candidate={candidate} rank={index + 1} reportId={reportId} isDemo={Boolean(demoScenario)} />
+                <MatchCandidateCard candidate={candidate} rank={index + 1} reportId={reportId} demoScenario={demoScenario} />
               </li>
             ))}
           </ol>
@@ -80,8 +80,7 @@ function MatchResultsPage({ state, demoScenario, onRetry }: {
 }
 
 export function DemoMatchResultsPage({ params }: { params: URLSearchParams }) {
-  const value = params.get('scenario')
-  const scenario = value && Object.hasOwn(MATCH_DEMO_SCENARIOS, value) ? value as MatchDemoScenario : 'three'
+  const scenario = getMatchDemoScenario(params.get('scenario')) ?? 'three'
   return <MatchResultsPage state={getDemoMatchState(scenario)} demoScenario={scenario} />
 }
 
@@ -105,5 +104,5 @@ export function ReportMatchResultsPage({ reportId }: { reportId: string }) {
     setAttempt((current) => current + 1)
   }
 
-  return <MatchResultsPage state={state} onRetry={retry} />
+  return <MatchResultsPage state={state} reportId={reportId} onRetry={retry} />
 }

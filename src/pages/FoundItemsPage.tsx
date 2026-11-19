@@ -1,3 +1,4 @@
+import { getFoundItemPath, getFoundSearchParams } from '../app/foundItemRoutes'
 import { FoundItemCard } from '../components/FoundItemCard'
 import { Icon } from '../components/Icon'
 import { CATEGORY_LABELS, foundItems } from '../data/foundItems'
@@ -5,9 +6,10 @@ import { CATEGORY_LABELS, foundItems } from '../data/foundItems'
 const buildings = [...new Set(foundItems.map(({ building }) => building))]
 
 export function FoundItemsPage({ params }: { params: URLSearchParams }) {
-  const keyword = params.get('q')?.trim() ?? ''
-  const category = params.get('category') ?? ''
-  const building = params.get('building') ?? ''
+  const search = getFoundSearchParams(params)
+  const keyword = search.get('q') ?? ''
+  const category = search.get('category') ?? ''
+  const building = search.get('building') ?? ''
   const results = foundItems.filter((item) =>
     (!category || category === item.category) &&
     (!building || building === item.building) &&
@@ -43,7 +45,11 @@ export function FoundItemsPage({ params }: { params: URLSearchParams }) {
         <h2 id="results-title">습득물 {results.length}건</h2>
         {results.length ? (
           <ul className="search-results-grid">
-            {results.map((item) => <li key={item.id}><FoundItemCard item={item} showFoundAt /></li>)}
+            {results.map((item) => (
+              <li key={item.id}>
+                <FoundItemCard item={item} href={getFoundItemPath(item.id, { source: 'search', params: search })} showFoundAt />
+              </li>
+            ))}
           </ul>
         ) : (
           <div className="page-panel">

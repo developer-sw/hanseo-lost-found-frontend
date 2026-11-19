@@ -2,8 +2,8 @@ import { Header } from '../components/Header'
 import { LoginForm } from '../components/LoginForm'
 import { MobileBottomNavigation } from '../components/MobileBottomNavigation'
 import { SignupForm } from '../components/SignupForm'
-import { foundItems } from '../data/foundItems'
 import { AuthPage } from '../pages/AuthPage'
+import { FoundItemDetailPage } from '../pages/FoundItemDetailPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
 import { FoundReportPage } from '../pages/FoundReportPage'
 import { GuidePage } from '../pages/GuidePage'
@@ -11,6 +11,7 @@ import { HomePage } from '../pages/HomePage'
 import { LostReportPage } from '../pages/LostReportPage'
 import { DemoMatchResultsPage, ReportMatchResultsPage } from '../pages/MatchResultsPage'
 import { PendingPage } from '../pages/PendingPage'
+import { getFoundItemId } from './foundItemRoutes'
 import { getMatchReportId, MATCH_DEMO_PATH } from './matchRoutes'
 
 function renderPage(pathname: string, params: URLSearchParams) {
@@ -56,11 +57,12 @@ function renderPage(pathname: string, params: URLSearchParams) {
       const reportId = getMatchReportId(pathname)
       if (reportId) return <ReportMatchResultsPage key={reportId} reportId={reportId} />
 
-      const item = foundItems.find(({ id }) => pathname === `/found/${id}`)
+      if (pathname.startsWith('/found/')) {
+        const itemId = getFoundItemId(pathname)
+        return <FoundItemDetailPage key={itemId} itemId={itemId} params={params} />
+      }
 
-      return item
-        ? <PendingPage title={item.name} message="습득물 상세 화면과 수령 신청 기능을 준비 중입니다." backHref="/found" backLabel="습득물 목록으로" />
-        : <PendingPage title="페이지를 찾을 수 없습니다" message="주소를 확인하거나 홈으로 돌아가 주세요." />
+      return <PendingPage title="페이지를 찾을 수 없습니다" message="주소를 확인하거나 홈으로 돌아가 주세요." />
     }
   }
 }

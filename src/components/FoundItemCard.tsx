@@ -1,15 +1,20 @@
+import { getFoundItemPath } from '../app/foundItemRoutes'
 import { CATEGORY_LABELS, formatRegisteredAt } from '../data/foundItems'
 import type { FoundItem } from '../types/foundItem'
 import { Icon } from './Icon'
 import { KoreanDateTime } from './KoreanDateTime'
 import '../styles/home-sections.css'
 
-export function FoundItemCard({ item, showFoundAt = false }: { item: FoundItem; showFoundAt?: boolean }) {
+export function FoundItemCard({ item, href, showFoundAt = false }: {
+  item: FoundItem
+  href?: string
+  showFoundAt?: boolean
+}) {
   const { id, name, category, building, locationDetail, foundAt, registeredAt, image } = item
   const location = locationDetail ? `${building} ${locationDetail}` : building
 
   return (
-    <a className="found-item-card" href={`/found/${id}`}>
+    <a className="found-item-card" href={href ?? getFoundItemPath(id)}>
       <img className="found-item-card__image" src={image} alt="" loading="lazy" />
       <div className="found-item-card__body">
         <span className="found-item-card__category">{CATEGORY_LABELS[category]}</span>
