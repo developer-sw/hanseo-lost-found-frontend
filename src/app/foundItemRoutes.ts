@@ -1,5 +1,8 @@
 import type { MatchDemoScenario } from '../data/demoMatches'
 import { getMatchDemoScenario, getMatchedFoundItemPath, getMatchResultPath, MATCH_DEMO_PATH } from './matchRoutes'
+import { getMyActivityPath } from './myActivityRoutes'
+
+type MyFoundDetailTab = 'found' | 'claims'
 
 export type FoundItemClaimContext =
   | { source: 'search' }
@@ -10,12 +13,14 @@ export interface FoundItemNavigation {
   backHref: string
   backLabel: string
   claimContext: FoundItemClaimContext
+  myTab?: MyFoundDetailTab
 }
 
 type FoundItemLinkContext =
   | { source: 'search'; params: URLSearchParams }
   | { source: 'match-demo'; scenario: MatchDemoScenario }
   | { source: 'match'; lostReportId: string }
+  | { source: 'my'; tab: MyFoundDetailTab; account?: boolean }
 
 function isPathId(value: string | null): value is string {
   return Boolean(value && value.trim() === value && value !== '.' && value !== '..' && !/[\\/]/.test(value))
@@ -51,6 +56,11 @@ export function getFoundItemPath(id: string, context?: FoundItemLinkContext) {
   if (context?.source === 'match') return getMatchedFoundItemPath(id, context.lostReportId)
 
   const path = getMatchedFoundItemPath(id)
+  if (context?.source === 'my') {
+    const params = new URLSearchParams({ source: 'my', tab: context.tab })
+    if (context.account) params.set('view', 'account')
+    return withSearch(path, params)
+  }
   if (context?.source === 'search') return withSearch(path, getFoundSearchParams(context.params))
   if (context?.source === 'match-demo') {
     return withSearch(path, new URLSearchParams({ source: 'match-demo', scenario: context.scenario }))
@@ -59,7 +69,18 @@ export function getFoundItemPath(id: string, context?: FoundItemLinkContext) {
 }
 
 export function getFoundItemNavigation(params: URLSearchParams): FoundItemNavigation {
-  if (params.get('source') === 'match-demo') {
+  const source = params.get('source')
+  if (source === 'my') {
+    const tab = params.get('tab')
+    if (tab === 'found' || tab === 'claims') {
+      return {
+        backHref: getMyActivityPath(tab, { account: params.get('view') === 'account' }),
+        backLabel: tab === 'found' ? '내 습득 신고로 돌아가기' : '내 수령 신청으로 돌아가기',
+        claimContext: { source: 'search' },
+        myTab: tab,
+      }
+    }
+  } else if (source === 'match-demo') {
     const scenario = getMatchDemoScenario(params.get('scenario'))
     if (scenario) {
       return {

@@ -2,6 +2,7 @@ import { campusBuildings } from '../data/campusBuildings'
 import { CATEGORY_LABELS } from '../data/categories'
 import type { FoundCategory } from '../types/foundItem'
 import type { FoundReportFields, FoundReportRequest } from '../types/foundReport'
+import type { FoundReportUpdateRequest } from '../types/myActivity'
 import { LOCATION_DETAIL_MAX_LENGTH } from './lostReportValidation'
 import { parseKoreanDateTimeInput } from './reportDateTime'
 
@@ -9,15 +10,17 @@ export { LOCATION_DETAIL_MAX_LENGTH } from './lostReportValidation'
 
 export type FoundReportErrors = Partial<Record<keyof FoundReportFields, string>>
 
-type FoundReportValidationResult =
+type FoundReportValidationResult<Request> =
   | { status: 'invalid'; errors: FoundReportErrors }
-  | { status: 'valid'; request: FoundReportRequest }
+  | { status: 'valid'; request: Request }
 
 function isFoundCategory(categoryId: string): categoryId is FoundCategory {
   return Object.hasOwn(CATEGORY_LABELS, categoryId)
 }
 
-export function validateFoundReport(fields: FoundReportFields, now = new Date()): FoundReportValidationResult {
+export function validateFoundReport(fields: FoundReportFields, now?: Date): FoundReportValidationResult<FoundReportRequest>
+export function validateFoundReport(fields: FoundReportFields, now: Date, retainExistingPhoto: boolean): FoundReportValidationResult<FoundReportUpdateRequest>
+export function validateFoundReport(fields: FoundReportFields, now = new Date(), retainExistingPhoto = false): FoundReportValidationResult<FoundReportUpdateRequest> {
   const errors: FoundReportErrors = {}
   const itemName = fields.itemName.trim()
   const categoryId = isFoundCategory(fields.categoryId) ? fields.categoryId : undefined
@@ -39,13 +42,13 @@ export function validateFoundReport(fields: FoundReportFields, now = new Date())
     errors.buildingId = '습득 장소의 건물을 선택해 주세요.'
   }
 
-  if (!photo) errors.photo = '습득물 사진을 선택해 주세요.'
+  if (!photo && !retainExistingPhoto) errors.photo = '습득물 사진을 선택해 주세요.'
 
   if ([...fields.locationDetail].length > LOCATION_DETAIL_MAX_LENGTH) {
     errors.locationDetail = `세부 위치는 ${LOCATION_DETAIL_MAX_LENGTH}자 이내로 입력해 주세요.`
   }
 
-  if (!categoryId || foundTimestamp === undefined || !photo || Object.keys(errors).length > 0) {
+  if (!categoryId || foundTimestamp === undefined || Object.keys(errors).length > 0) {
     return { status: 'invalid', errors }
   }
 
@@ -61,7 +64,7 @@ export function validateFoundReport(fields: FoundReportFields, now = new Date())
       buildingId: fields.buildingId,
       ...(locationDetail ? { locationDetail } : {}),
       ...(description ? { description } : {}),
-      photo,
+      ...(photo ? { photo } : {}),
     },
   }
 }

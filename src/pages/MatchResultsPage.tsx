@@ -6,29 +6,34 @@ import { MatchCandidateCard } from '../components/MatchCandidateCard'
 import { MatchReportSummary } from '../components/MatchReportSummary'
 import { MatchStateNotice } from '../components/MatchStateNotice'
 import { getDemoMatchState, MATCH_DEMO_SCENARIOS, type MatchDemoScenario } from '../data/demoMatches'
+import { DEMO_MATCH_LOST_REPORT_ID, demoMyActivity } from '../data/demoMyActivity'
 import { matchService } from '../services/matches'
 import type { MatchViewState } from '../types/match'
 import '../styles/match.css'
 
-function DemoControls({ scenario }: { scenario: MatchDemoScenario }) {
+function DemoControls({ scenario, example }: { scenario: MatchDemoScenario; example: string | null }) {
   return (
     <div className="match-demo">
       <p><Icon name="info" size={19} /><span><strong>데모 모드</strong> · 예시 분실 신고와 샘플 점수를 표시합니다. 실제 신고나 수령 신청과 연결되지 않습니다.</span></p>
-      <form className="match-demo__controls" action={MATCH_DEMO_PATH} method="get">
-        <label htmlFor="match-demo-scenario">데모 상태</label>
-        <select id="match-demo-scenario" name="scenario" defaultValue={scenario}>
-          {Object.entries(MATCH_DEMO_SCENARIOS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-        </select>
-        <button className="secondary-link" type="submit">보기</button>
-      </form>
+      {(!example || example === DEMO_MATCH_LOST_REPORT_ID) && (
+        <form className="match-demo__controls" action={MATCH_DEMO_PATH} method="get">
+          {example && <input type="hidden" name="example" value={example} />}
+          <label htmlFor="match-demo-scenario">데모 상태</label>
+          <select id="match-demo-scenario" name="scenario" defaultValue={scenario}>
+            {Object.entries(MATCH_DEMO_SCENARIOS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+          <button className="secondary-link" type="submit">보기</button>
+        </form>
+      )}
     </div>
   )
 }
 
-function MatchResultsPage({ state, reportId, demoScenario, onRetry }: {
+function MatchResultsPage({ state, reportId, demoScenario, demoExample = null, onRetry }: {
   state: MatchViewState
   reportId?: string
   demoScenario?: MatchDemoScenario
+  demoExample?: string | null
   onRetry?: () => void
 }) {
   const result = state.status === 'ready' ? state.result : undefined
@@ -36,8 +41,11 @@ function MatchResultsPage({ state, reportId, demoScenario, onRetry }: {
   const candidates = result?.candidates.filter(({ score }) => score > 0).slice(0, 3) ?? []
   const isEmpty = state.status === 'ready' && candidates.length === 0
   const title = isEmpty ? '아직 비슷한 습득물이 없어요.' : candidates.length ? '비슷한 습득물을 찾았어요!' : '자동 매칭 결과'
+  const emptyMessage = demoScenario && result?.report.status === 'CLOSED'
+    ? '종료한 예시 신고에 표시할 추천 결과가 없습니다.'
+    : '새로운 습득물이 등록되면 다시 확인할 수 있어요.'
   const intro = isEmpty
-    ? '새로운 습득물이 등록되면 다시 확인할 수 있어요.'
+    ? emptyMessage
     : candidates.length ? '신고하신 분실물과 비슷한 습득물을 확인해 보세요.' : undefined
 
   return (
@@ -50,7 +58,7 @@ function MatchResultsPage({ state, reportId, demoScenario, onRetry }: {
         <Hanbi className="match-mascot" compact />
       </header>
 
-      {demoScenario && <DemoControls scenario={demoScenario} />}
+      {demoScenario && <DemoControls scenario={demoScenario} example={demoExample} />}
       {result && <MatchReportSummary report={result.report} />}
 
       {candidates.length > 0 && (
@@ -81,7 +89,17 @@ function MatchResultsPage({ state, reportId, demoScenario, onRetry }: {
 
 export function DemoMatchResultsPage({ params }: { params: URLSearchParams }) {
   const scenario = getMatchDemoScenario(params.get('scenario')) ?? 'three'
-  return <MatchResultsPage state={getDemoMatchState(scenario)} demoScenario={scenario} />
+  const example = params.get('example')
+  if (example === null || example === DEMO_MATCH_LOST_REPORT_ID) {
+    return <MatchResultsPage state={getDemoMatchState(scenario)} demoScenario={scenario} demoExample={example} />
+  }
+
+  const lostReport = demoMyActivity.lostReports.find(({ id }) => id === example)
+  const state: MatchViewState = lostReport ? {
+    status: 'ready',
+    result: { report: lostReport, candidates: [] },
+  } : { status: 'not-found' }
+  return <MatchResultsPage state={state} demoScenario="empty" demoExample={example} />
 }
 
 export function ReportMatchResultsPage({ reportId }: { reportId: string }) {

@@ -19,6 +19,7 @@ interface FoundPhotoFieldProps {
   selection: FoundPhotoSelection
   onSelectionChange: (next: FoundPhotoSelection) => void
   error?: string
+  existingPhoto?: string
 }
 
 function revokePreview(activeUrl: RefObject<string | null>) {
@@ -28,14 +29,17 @@ function revokePreview(activeUrl: RefObject<string | null>) {
   }
 }
 
-export function FoundPhotoField({ selection, onSelectionChange, error }: FoundPhotoFieldProps) {
+export function FoundPhotoField({ selection, onSelectionChange, error, existingPhoto }: FoundPhotoFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const activeUrl = useRef<string | null>(null)
   const selectionVersion = useRef(0)
   const dragDepth = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [failedExistingPhoto, setFailedExistingPhoto] = useState<string>()
   const isReady = selection.status === 'ready'
   const isChecking = selection.status === 'checking'
+  const keepsExistingPhoto = Boolean(existingPhoto) && selection.status === 'empty'
+  const showsExistingPhoto = keepsExistingPhoto && existingPhoto !== failedExistingPhoto
   const errorMessage = error || (selection.status === 'invalid' ? selection.message : '')
 
   useEffect(() => () => {
@@ -132,7 +136,7 @@ export function FoundPhotoField({ selection, onSelectionChange, error }: FoundPh
         className="found-photo__zone"
         data-dragging={isDragging}
         data-invalid={Boolean(errorMessage)}
-        data-ready={isReady}
+        data-ready={isReady || showsExistingPhoto}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -140,14 +144,20 @@ export function FoundPhotoField({ selection, onSelectionChange, error }: FoundPh
       >
         {isReady ? (
           <img className="found-photo__preview" src={selection.previewUrl} alt="선택한 습득물 사진 미리보기" />
+        ) : showsExistingPhoto ? (
+          <img className="found-photo__preview" src={existingPhoto} alt="등록된 습득물 사진" onError={() => setFailedExistingPhoto(existingPhoto)} />
         ) : (
           <div className="found-photo__icon"><Icon name="box" size={28} /></div>
         )}
 
         <div className="found-photo__details">
-          <p className="found-photo__title">{isReady ? '선택한 사진' : '주운 물건의 사진을 등록해 주세요.'}</p>
+          <p className="found-photo__title">{isReady ? '선택한 사진' : keepsExistingPhoto ? '기존 습득물 사진' : '주운 물건의 사진을 등록해 주세요.'}</p>
           {isReady ? (
             <p className="found-photo__name" title={selection.file.name}>{selection.file.name}</p>
+          ) : keepsExistingPhoto ? (
+            <p className="found-photo__description">
+              {showsExistingPhoto ? '변경할 사진을 선택하지 않으면 기존 사진을 유지합니다.' : '기존 사진을 불러오지 못했습니다. 필요하면 새 사진을 선택해 주세요.'}
+            </p>
           ) : (
             <p className="found-photo__description">물품 전체가 잘 보이면 주인을 찾는 데 도움이 됩니다.</p>
           )}
@@ -161,10 +171,12 @@ export function FoundPhotoField({ selection, onSelectionChange, error }: FoundPh
               aria-describedby={errorMessage ? 'found-photo-error found-photo-hint' : 'found-photo-hint'}
               onClick={() => inputRef.current?.click()}
             >
-              {isReady || isChecking ? '사진 변경' : '사진 선택'}
+              {isReady || isChecking || existingPhoto ? '사진 변경' : '사진 선택'}
             </button>
-            {(isReady || isChecking) && (
-              <button className="found-photo__remove" type="button" onClick={removePhoto}>사진 제거</button>
+            {(isReady || isChecking || (existingPhoto && selection.status === 'invalid')) && (
+              <button className="found-photo__remove" type="button" onClick={removePhoto}>
+                {existingPhoto ? '기존 사진 유지' : '사진 제거'}
+              </button>
             )}
           </div>
         </div>

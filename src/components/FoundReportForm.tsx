@@ -2,24 +2,39 @@ import { useRef, useState, type FormEvent } from 'react'
 import { campusBuildings } from '../data/campusBuildings'
 import { CATEGORY_LABELS } from '../data/categories'
 import { foundReportService } from '../services/foundReports'
-import type { FoundReportFields, FoundReportRequest } from '../types/foundReport'
+import type { FoundReportFields } from '../types/foundReport'
+import type { FoundReportUpdateRequest, MyActivityMutationResult, MyFoundReport } from '../types/myActivity'
 import { LOCATION_DETAIL_MAX_LENGTH, validateFoundReport, type FoundReportErrors } from '../utils/foundReportValidation'
+import { getMyActivityMutationFeedback } from '../utils/myActivityFeedback'
 import { formatKoreanDateTimeInput } from '../utils/reportDateTime'
 import { FoundPhotoField, type FoundPhotoSelection } from './FoundPhotoField'
 import { KoreanDateTime } from './KoreanDateTime'
 import { ReportActions } from './ReportActions'
 import { ReportField } from './ReportField'
 
+interface FoundReportFormProps {
+  edit?: {
+    initial: MyFoundReport
+    onSave: (request: FoundReportUpdateRequest) => Promise<MyActivityMutationResult>
+    onSaved?: () => void
+    noticeId?: string
+    returnHref?: string
+  }
+}
+
 const fieldOrder: (keyof FoundReportFields)[] = [
   'itemName', 'categoryId', 'foundAt', 'buildingId', 'locationDetail', 'photo', 'description',
 ]
 
-export function FoundReportForm() {
+export function FoundReportForm({ edit }: FoundReportFormProps = {}) {
+  const initial = edit?.initial
+  const returnHref = edit?.returnHref ?? '/my?tab=found'
+  const existingPhoto = initial?.image?.trim() || undefined
   const [photo, setPhoto] = useState<FoundPhotoSelection>({ status: 'empty' })
   const [errors, setErrors] = useState<FoundReportErrors>({})
-  const [locationDetailLength, setLocationDetailLength] = useState(0)
+  const [locationDetailLength, setLocationDetailLength] = useState(() => [...(initial?.locationDetail ?? '')].length)
   const [latestDateTime, setLatestDateTime] = useState(() => formatKoreanDateTimeInput(new Date()))
-  const [preview, setPreview] = useState<FoundReportRequest | null>(null)
+  const [preview, setPreview] = useState<FoundReportUpdateRequest | null>(null)
   const [feedback, setFeedback] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const reviewTitleRef = useRef<HTMLHeadingElement>(null)
@@ -43,6 +58,7 @@ export function FoundReportForm() {
     const data = new FormData(form)
     const read = (field: keyof FoundReportFields) => String(data.get(field) ?? '')
     const now = new Date()
+    const retainsPhoto = Boolean(existingPhoto) && photo.status === 'empty'
     const validation = validateFoundReport({
       itemName: read('itemName'),
       categoryId: read('categoryId'),
@@ -51,7 +67,7 @@ export function FoundReportForm() {
       locationDetail: read('locationDetail'),
       description: read('description'),
       photo: photo.status === 'ready' ? photo.file : null,
-    }, now)
+    }, now, retainsPhoto)
 
     setPreview(null)
     setFeedback('')
@@ -77,16 +93,34 @@ export function FoundReportForm() {
     setErrors({})
     setIsSubmitting(true)
     try {
-      const result = await foundReportService.create(validation.request)
-      if (result.status === 'unavailable') {
-        setPreview(validation.request)
-        setFeedback('데모 미리보기입니다. 입력 정보와 사진은 서버에 저장되지 않았습니다.')
-        requestAnimationFrame(() => reviewTitleRef.current?.focus())
+      if (edit) {
+        const result = await edit.onSave(validation.request)
+        if (result.status === 'success') {
+          if (edit.onSaved) edit.onSaved()
+          else window.location.assign(returnHref)
+          return
+        }
+        if (result.status !== 'unavailable') {
+          setFeedback(getMyActivityMutationFeedback(result.status))
+          return
+        }
       } else {
-        window.location.assign('/my?tab=found')
+        const validatedPhoto = validation.request.photo
+        if (!validatedPhoto) return
+        const result = await foundReportService.create({ ...validation.request, photo: validatedPhoto })
+        if (result.status === 'created') {
+          window.location.assign('/my?tab=found')
+          return
+        }
       }
+
+      setPreview(validation.request)
+      setFeedback(edit
+        ? '데모 수정 미리보기입니다. 변경한 내용과 사진은 서버에 저장되지 않았습니다.'
+        : '데모 미리보기입니다. 입력 정보와 사진은 서버에 저장되지 않았습니다.')
+      requestAnimationFrame(() => reviewTitleRef.current?.focus())
     } catch {
-      setFeedback('습득물 등록 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+      setFeedback(edit ? '신고 수정 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' : '습득물 등록 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
       setIsSubmitting(false)
     }
@@ -100,17 +134,20 @@ export function FoundReportForm() {
     ['세부 위치', preview.locationDetail],
     ['물품 설명', preview.description],
   ] as const
+  const initialTimestamp = initial ? Date.parse(initial.foundAt) : NaN
+  const previewReplacement = preview?.photo && photo.status === 'ready' && photo.file === preview.photo ? photo : null
+  const previewRetainedPhoto = preview && !preview.photo && photo.status === 'empty' && existingPhoto
 
   return (
-    <form className="report-form" method="post" onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} aria-describedby="found-report-demo-notice">
+    <form className="report-form" method="post" onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} aria-describedby={edit ? edit.noticeId : 'found-report-demo-notice'}>
       <div className="report-fields">
         <ReportField id="found-item-name" label="물품명" error={errors.itemName} className="report-field--wide" required>
-          {(control) => <input {...control} name="itemName" type="text" placeholder="예: 에어팟 프로, 검정색 지갑, 학생증" onChange={() => clearFieldFeedback('itemName')} />}
+          {(control) => <input {...control} name="itemName" type="text" defaultValue={initial?.name} placeholder="예: 에어팟 프로, 검정색 지갑, 학생증" onChange={() => clearFieldFeedback('itemName')} />}
         </ReportField>
 
         <ReportField id="found-category" label="카테고리" error={errors.categoryId} required>
           {(control) => (
-            <select {...control} name="categoryId" defaultValue="" onChange={() => clearFieldFeedback('categoryId')}>
+            <select {...control} name="categoryId" defaultValue={initial?.category ?? ''} onChange={() => clearFieldFeedback('categoryId')}>
               <option value="">카테고리 선택</option>
               {Object.entries(CATEGORY_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
             </select>
@@ -123,6 +160,7 @@ export function FoundReportForm() {
               {...control}
               name="foundAt"
               type="datetime-local"
+              defaultValue={Number.isFinite(initialTimestamp) ? formatKoreanDateTimeInput(new Date(initialTimestamp)) : undefined}
               step={60}
               max={latestDateTime}
               onFocus={() => setLatestDateTime(formatKoreanDateTimeInput(new Date()))}
@@ -133,7 +171,7 @@ export function FoundReportForm() {
 
         <ReportField id="found-building" label="습득 장소 (건물)" error={errors.buildingId} hint="건물 외 장소는 ‘기타’를 선택해 주세요." required>
           {(control) => (
-            <select {...control} name="buildingId" defaultValue="" onChange={() => clearFieldFeedback('buildingId')}>
+            <select {...control} name="buildingId" defaultValue={initial?.buildingId ?? ''} onChange={() => clearFieldFeedback('buildingId')}>
               <option value="">건물 선택</option>
               {campusBuildings.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
             </select>
@@ -151,6 +189,7 @@ export function FoundReportForm() {
               {...control}
               name="locationDetail"
               type="text"
+              defaultValue={initial?.locationDetail}
               placeholder="예: 학생회관 1층 입구, 도서관 3층 열람실"
               onChange={(event) => {
                 setLocationDetailLength([...event.currentTarget.value].length)
@@ -160,7 +199,7 @@ export function FoundReportForm() {
           )}
         </ReportField>
 
-        <FoundPhotoField selection={photo} onSelectionChange={handlePhotoChange} error={errors.photo} />
+        <FoundPhotoField selection={photo} onSelectionChange={handlePhotoChange} error={errors.photo} existingPhoto={existingPhoto} />
 
         <ReportField
           id="found-description"
@@ -173,6 +212,7 @@ export function FoundReportForm() {
             <textarea
               {...control}
               name="description"
+              defaultValue={initial?.description}
               rows={4}
               placeholder="예: 흰색 이어폰이며 충전 케이스에 작은 스티커가 붙어 있습니다."
               onChange={() => clearFieldFeedback('description')}
@@ -185,9 +225,9 @@ export function FoundReportForm() {
         {feedback && <p className="report-feedback">{feedback}</p>}
       </div>
 
-      {preview && reviewDetails && photo.status === 'ready' && photo.file === preview.photo && (
+      {reviewDetails && (previewReplacement || previewRetainedPhoto) && (
         <section className="report-review" aria-labelledby="found-report-review-title">
-          <h2 id="found-report-review-title" ref={reviewTitleRef} tabIndex={-1}>습득 등록 내용 미리보기</h2>
+          <h2 id="found-report-review-title" ref={reviewTitleRef} tabIndex={-1}>{edit ? '습득 신고 수정 미리보기' : '습득 등록 내용 미리보기'}</h2>
           <dl className="report-review__details">
             {reviewDetails.map(([label, value]) => value && (
               <div key={label}>
@@ -196,14 +236,16 @@ export function FoundReportForm() {
               </div>
             ))}
           </dl>
-          <figure className="found-report-review__photo">
-            <img src={photo.previewUrl} alt="등록 내용에 포함된 습득물 사진" />
-            <figcaption title={preview.photo.name}>{preview.photo.name}</figcaption>
-          </figure>
+          {previewReplacement ? (
+            <figure className="found-report-review__photo">
+              <img src={previewReplacement.previewUrl} alt="등록 내용에 포함된 습득물 사진" />
+              <figcaption title={previewReplacement.file.name}>{previewReplacement.file.name}</figcaption>
+            </figure>
+          ) : <p>기존 습득물 사진을 유지합니다.</p>}
         </section>
       )}
 
-      <ReportActions isSubmitting={isSubmitting || photo.status === 'checking'} />
+      <ReportActions isSubmitting={isSubmitting || photo.status === 'checking'} cancelHref={edit ? returnHref : undefined} submitLabel={edit ? '수정 내용 확인' : undefined} />
     </form>
   )
 }

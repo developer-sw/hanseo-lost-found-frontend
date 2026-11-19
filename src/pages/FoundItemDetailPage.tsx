@@ -5,6 +5,7 @@ import { FoundItemPhoto } from '../components/FoundItemPhoto'
 import { Icon, type IconName } from '../components/Icon'
 import { KoreanDateTime } from '../components/KoreanDateTime'
 import { CATEGORY_LABELS } from '../data/categories'
+import { demoMyActivity } from '../data/demoMyActivity'
 import { foundItemService } from '../services/foundItems'
 import type { FoundItemDetailResult, FoundItemStatus } from '../types/foundItem'
 import '../styles/found-item-detail.css'
@@ -42,11 +43,23 @@ const eligibilityMessages = {
   cancelled: '신청을 취소한 뒤에는 같은 물품에 다시 신청할 수 없습니다.',
 }
 
-function getClaimUnavailable(detail: ReadyDetail) {
-  const { status, claimEligibility } = detail.item
+function getClaimUnavailable(detail: ReadyDetail, navigation: DetailNavigation) {
+  const { id, status, claimEligibility } = detail.item
   if (statuses[status].unavailable) return statuses[status].unavailable
-  if (detail.source !== 'api' || !claimEligibility || claimEligibility.status === 'allowed') return
-  return eligibilityMessages[claimEligibility.status]
+  if (detail.source === 'api') {
+    if (claimEligibility && claimEligibility.status !== 'allowed') return eligibilityMessages[claimEligibility.status]
+    return
+  }
+
+  if (navigation.myTab === 'found' && demoMyActivity.foundReports.some((report) => report.id === id)) {
+    return eligibilityMessages['own-item']
+  }
+  if (navigation.myTab === 'claims') {
+    const claim = demoMyActivity.claims.find(({ foundItemId }) => foundItemId === id)
+    if (claim?.status === 'REJECTED') return eligibilityMessages.rejected
+    if (claim?.status === 'CANCELLED') return eligibilityMessages.cancelled
+    if (claim?.status === 'PENDING') return eligibilityMessages['already-requested']
+  }
 }
 
 function StatusBadge({ status }: { status: FoundItemStatus }) {
@@ -65,7 +78,7 @@ function DetailContent({ detail, navigation }: {
   const { item, source } = detail
   const [claimOpen, setClaimOpen] = useState(false)
   const claimTrigger = useRef<HTMLButtonElement>(null)
-  const unavailable = getClaimUnavailable(detail)
+  const unavailable = getClaimUnavailable(detail, navigation)
 
   function closeClaim() {
     setClaimOpen(false)

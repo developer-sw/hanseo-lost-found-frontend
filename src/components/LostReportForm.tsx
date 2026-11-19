@@ -4,14 +4,26 @@ import { campusBuildings } from '../data/campusBuildings'
 import { CATEGORY_LABELS } from '../data/categories'
 import { lostReportService } from '../services/lostReports'
 import type { LostReportFields, LostReportRequest } from '../types/lostReport'
+import type { MyActivityMutationResult, MyLostReport } from '../types/myActivity'
 import {
   formatKoreanDateTimeInput,
   LOCATION_DETAIL_MAX_LENGTH,
   validateLostReport,
   type LostReportErrors,
 } from '../utils/lostReportValidation'
+import { getMyActivityMutationFeedback } from '../utils/myActivityFeedback'
 import { ReportActions } from './ReportActions'
 import { ReportField } from './ReportField'
+
+interface LostReportFormProps {
+  edit?: {
+    initial: MyLostReport
+    onSave: (request: LostReportRequest) => Promise<MyActivityMutationResult>
+    onSaved?: () => void
+    noticeId?: string
+    returnHref?: string
+  }
+}
 
 const fieldOrder: (keyof LostReportFields)[] = [
   'itemName', 'categoryId', 'lostAt', 'buildingId', 'locationDetail', 'description',
@@ -23,9 +35,11 @@ const koreanDateTime = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
 })
 
-export function LostReportForm() {
+export function LostReportForm({ edit }: LostReportFormProps = {}) {
+  const initial = edit?.initial
+  const returnHref = edit?.returnHref ?? '/my?tab=lost'
   const [errors, setErrors] = useState<LostReportErrors>({})
-  const [locationDetailLength, setLocationDetailLength] = useState(0)
+  const [locationDetailLength, setLocationDetailLength] = useState(() => [...(initial?.locationDetail ?? '')].length)
   const [latestDateTime, setLatestDateTime] = useState(() => formatKoreanDateTimeInput(new Date()))
   const [preview, setPreview] = useState<LostReportRequest | null>(null)
   const [feedback, setFeedback] = useState('')
@@ -76,16 +90,32 @@ export function LostReportForm() {
     setErrors({})
     setIsSubmitting(true)
     try {
-      const result = await lostReportService.create(validation.request)
-      if (result.status === 'unavailable') {
-        setPreview(validation.request)
-        setFeedback('데모 미리보기입니다. 입력한 내용은 서버에 저장되지 않았습니다.')
-        requestAnimationFrame(() => reviewTitleRef.current?.focus())
+      if (edit) {
+        const result = await edit.onSave(validation.request)
+        if (result.status === 'success') {
+          if (edit.onSaved) edit.onSaved()
+          else window.location.assign(returnHref)
+          return
+        }
+        if (result.status !== 'unavailable') {
+          setFeedback(getMyActivityMutationFeedback(result.status))
+          return
+        }
       } else {
-        window.location.assign(getMatchResultPath(result.reportId))
+        const result = await lostReportService.create(validation.request)
+        if (result.status === 'created') {
+          window.location.assign(getMatchResultPath(result.reportId))
+          return
+        }
       }
+
+      setPreview(validation.request)
+      setFeedback(edit
+        ? '데모 수정 미리보기입니다. 변경한 내용은 서버에 저장되지 않았습니다.'
+        : '데모 미리보기입니다. 입력한 내용은 서버에 저장되지 않았습니다.')
+      requestAnimationFrame(() => reviewTitleRef.current?.focus())
     } catch {
-      setFeedback('신고를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+      setFeedback(edit ? '신고 수정 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' : '신고를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
       setIsSubmitting(false)
     }
@@ -99,17 +129,18 @@ export function LostReportForm() {
     ['세부 위치', preview.locationDetail],
     ['물품 설명', preview.description],
   ]
+  const initialTimestamp = initial ? Date.parse(initial.lostAt) : NaN
 
   return (
-    <form className="report-form" method="post" onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} aria-describedby="lost-report-demo-notice">
+    <form className="report-form" method="post" onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} aria-describedby={edit ? edit.noticeId : 'lost-report-demo-notice'}>
       <div className="report-fields">
         <ReportField id="lost-item-name" label="물품명" error={errors.itemName} className="report-field--wide" required>
-          {(control) => <input {...control} name="itemName" type="text" placeholder="예: 에어팟 프로, 검정색 지갑, 학생증" onChange={() => clearFieldFeedback('itemName')} />}
+          {(control) => <input {...control} name="itemName" type="text" defaultValue={initial?.itemName} placeholder="예: 에어팟 프로, 검정색 지갑, 학생증" onChange={() => clearFieldFeedback('itemName')} />}
         </ReportField>
 
         <ReportField id="lost-category" label="카테고리" error={errors.categoryId} required>
           {(control) => (
-            <select {...control} name="categoryId" defaultValue="" onChange={() => clearFieldFeedback('categoryId')}>
+            <select {...control} name="categoryId" defaultValue={initial?.categoryId ?? ''} onChange={() => clearFieldFeedback('categoryId')}>
               <option value="">카테고리 선택</option>
               {Object.entries(CATEGORY_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
             </select>
@@ -122,6 +153,7 @@ export function LostReportForm() {
               {...control}
               name="lostAt"
               type="datetime-local"
+              defaultValue={Number.isFinite(initialTimestamp) ? formatKoreanDateTimeInput(new Date(initialTimestamp)) : undefined}
               step={60}
               max={latestDateTime}
               onFocus={() => setLatestDateTime(formatKoreanDateTimeInput(new Date()))}
@@ -132,7 +164,7 @@ export function LostReportForm() {
 
         <ReportField id="lost-building" label="분실 장소 (건물)" error={errors.buildingId} hint="건물 외 장소는 ‘기타’를 선택해 주세요." required>
           {(control) => (
-            <select {...control} name="buildingId" defaultValue="" onChange={() => clearFieldFeedback('buildingId')}>
+            <select {...control} name="buildingId" defaultValue={initial?.buildingId ?? ''} onChange={() => clearFieldFeedback('buildingId')}>
               <option value="">건물 선택</option>
               {campusBuildings.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
             </select>
@@ -150,6 +182,7 @@ export function LostReportForm() {
               {...control}
               name="locationDetail"
               type="text"
+              defaultValue={initial?.locationDetail}
               placeholder="예: 2층 강의실 앞, 정문 근처"
               onChange={(event) => {
                 setLocationDetailLength([...event.currentTarget.value].length)
@@ -170,6 +203,7 @@ export function LostReportForm() {
             <textarea
               {...control}
               name="description"
+              defaultValue={initial?.description}
               rows={4}
               placeholder="예: 흰색 에어팟 프로이고 케이스에 작은 스티커가 붙어 있습니다."
               onChange={() => clearFieldFeedback('description')}
@@ -184,7 +218,7 @@ export function LostReportForm() {
 
       {reviewDetails && (
         <section className="report-review" aria-labelledby="lost-report-review-title">
-          <h2 id="lost-report-review-title" ref={reviewTitleRef} tabIndex={-1}>신고 내용 미리보기</h2>
+          <h2 id="lost-report-review-title" ref={reviewTitleRef} tabIndex={-1}>{edit ? '분실 신고 수정 미리보기' : '신고 내용 미리보기'}</h2>
           <dl className="report-review__details">
             {reviewDetails.map(([label, value]) => value && (
               <div key={label}>
@@ -193,11 +227,11 @@ export function LostReportForm() {
               </div>
             ))}
           </dl>
-          <a className="secondary-link report-review__demo-link" href={MATCH_DEMO_PATH}>데모 매칭 결과 보기</a>
+          {!edit && <a className="secondary-link report-review__demo-link" href={MATCH_DEMO_PATH}>데모 매칭 결과 보기</a>}
         </section>
       )}
 
-      <ReportActions isSubmitting={isSubmitting} />
+      <ReportActions isSubmitting={isSubmitting} cancelHref={edit ? returnHref : undefined} submitLabel={edit ? '수정 내용 확인' : undefined} />
     </form>
   )
 }

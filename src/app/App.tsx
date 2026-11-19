@@ -10,6 +10,7 @@ import { GuidePage } from '../pages/GuidePage'
 import { HomePage } from '../pages/HomePage'
 import { LostReportPage } from '../pages/LostReportPage'
 import { DemoMatchResultsPage, ReportMatchResultsPage } from '../pages/MatchResultsPage'
+import { MyActivityPage } from '../pages/MyActivityPage'
 import { PendingPage } from '../pages/PendingPage'
 import { getFoundItemId } from './foundItemRoutes'
 import { getMatchReportId, MATCH_DEMO_PATH } from './matchRoutes'
@@ -38,7 +39,7 @@ function renderPage(pathname: string, params: URLSearchParams) {
     case '/report/found':
       return <FoundReportPage />
     case '/my':
-      return <PendingPage title={params.get('tab') === 'claims' ? '내 수령 신청' : '내 신고·신청'} message="로그인 후 내 신고와 수령 신청을 확인할 수 있는 화면을 준비 중입니다." />
+      return <MyActivityPage params={params} />
     case '/account':
       return params.get('tab') === 'notifications'
         ? <PendingPage title="알림" message="로그인과 알림 기능을 준비 중입니다." />
