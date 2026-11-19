@@ -1,7 +1,9 @@
+import { lazy, Suspense } from 'react'
 import { Header } from '../components/Header'
 import { LoginForm } from '../components/LoginForm'
 import { MobileBottomNavigation } from '../components/MobileBottomNavigation'
 import { SignupForm } from '../components/SignupForm'
+import { AdminPage } from '../pages/AdminPage'
 import { AuthPage } from '../pages/AuthPage'
 import { FoundItemDetailPage } from '../pages/FoundItemDetailPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
@@ -12,8 +14,11 @@ import { LostReportPage } from '../pages/LostReportPage'
 import { DemoMatchResultsPage, ReportMatchResultsPage } from '../pages/MatchResultsPage'
 import { MyActivityPage } from '../pages/MyActivityPage'
 import { PendingPage } from '../pages/PendingPage'
+import { getAdminSection } from './adminRoutes'
 import { getFoundItemId } from './foundItemRoutes'
 import { getMatchReportId, MATCH_DEMO_PATH } from './matchRoutes'
+
+const AdminDemoPage = import.meta.env.DEV ? lazy(() => import('../pages/AdminDemoPage')) : undefined
 
 function renderPage(pathname: string, params: URLSearchParams) {
   switch (pathname) {
@@ -45,7 +50,7 @@ function renderPage(pathname: string, params: URLSearchParams) {
         ? <PendingPage title="알림" message="로그인과 알림 기능을 준비 중입니다." />
         : (
           <AuthPage title="로그인" description="이용할 계정 유형을 선택해 주세요.">
-            <LoginForm />
+            <LoginForm initialRole={params.get('role') === 'admin' ? 'admin' : 'student'} />
           </AuthPage>
         )
     case '/account/signup':
@@ -70,12 +75,27 @@ function renderPage(pathname: string, params: URLSearchParams) {
 
 export function App() {
   const { pathname, search } = window.location
+  const params = new URLSearchParams(search)
+
+  if (AdminDemoPage) {
+    const section = getAdminSection(pathname, '/admin/demo')
+    if (section) {
+      return (
+        <Suspense fallback={<PendingPage title="관리자 데모" message="데모 화면을 불러오는 중입니다." />}>
+          <AdminDemoPage section={section} params={params} />
+        </Suspense>
+      )
+    }
+  }
+
+  const adminSection = getAdminSection(pathname)
+  if (adminSection) return <AdminPage section={adminSection} />
 
   return (
     <>
       <a className="skip-link" href="#main-content">본문으로 바로 이동</a>
       <Header pathname={pathname} search={search} />
-      {renderPage(pathname, new URLSearchParams(search))}
+      {renderPage(pathname, params)}
       <MobileBottomNavigation pathname={pathname} search={search} />
     </>
   )

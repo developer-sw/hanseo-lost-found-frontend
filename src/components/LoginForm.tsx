@@ -104,9 +104,9 @@ function RoleLoginForm({ role }: { role: AuthRole }) {
   )
 }
 
-export function LoginForm() {
+export function LoginForm({ initialRole = 'student' }: { initialRole?: AuthRole }) {
   const tabId = useId()
-  const [activeRole, setActiveRole] = useState<AuthRole>('student')
+  const [activeRole, setActiveRole] = useState<AuthRole>(initialRole)
   const tabs = useRef<Record<AuthRole, HTMLButtonElement | null>>({ student: null, admin: null })
 
   function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, role: AuthRole) {

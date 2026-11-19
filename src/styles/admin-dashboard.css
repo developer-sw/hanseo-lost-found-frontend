@@ -1,0 +1,300 @@
+.admin-dashboard {
+  display: grid;
+  gap: clamp(1.35rem, 2.7vw, 2.15rem);
+  min-inline-size: 0;
+}
+
+.admin-dashboard__heading h1 {
+  color: var(--text);
+  font-size: clamp(1.65rem, 3.5vw, 2.35rem);
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+}
+
+.admin-dashboard__heading p {
+  margin-block-start: 0.45rem;
+  color: var(--muted);
+}
+
+.admin-dashboard__demo-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  min-inline-size: 0;
+}
+
+.admin-dashboard__demo-control label {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.admin-dashboard__demo-control select {
+  inline-size: 10rem;
+  max-inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #cfdfd3;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.admin-dashboard__demo-control button {
+  min-inline-size: 2.75rem;
+}
+
+.admin-dashboard__summary-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-block-end: 0.8rem;
+}
+
+.admin-dashboard__summary-heading h2,
+.admin-dashboard__quick > h2 {
+  color: var(--text);
+  font-size: clamp(1.18rem, 2.3vw, 1.45rem);
+  line-height: 1.3;
+  letter-spacing: -0.027em;
+}
+
+.admin-dashboard__total {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #d7e7db;
+  border-radius: 100vmax;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.admin-dashboard__total strong {
+  margin-inline-start: 0.2rem;
+  color: var(--green-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-dashboard__stats,
+.admin-dashboard__quick ul {
+  display: grid;
+  gap: clamp(0.65rem, 1.5vw, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-dashboard__stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-status-card {
+  --stat-border: #d5e8da;
+  --stat-surface: #f0f8f2;
+  --stat-accent: #145637;
+  --stat-icon: #dcefe2;
+  --stat-description: #43584b;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-items: start;
+  gap: 0.55rem;
+  min-inline-size: 0;
+  padding: clamp(0.9rem, 1.8vw, 1.35rem);
+  border: 1px solid var(--stat-border);
+  border-radius: 1rem;
+  background: var(--stat-surface);
+  color: var(--stat-accent);
+  box-shadow: 0 4px 12px rgb(17 61 37 / 5%);
+}
+
+.admin-status-card[data-status='CLAIM_REQUESTED'] {
+  --stat-border: #f1e3bc;
+  --stat-surface: #fff8e8;
+  --stat-accent: #68440d;
+  --stat-icon: #f9e8b8;
+  --stat-description: #614e31;
+}
+
+.admin-status-card[data-status='AWAITING_PICKUP'] {
+  --stat-border: var(--green-dark);
+  --stat-surface: var(--green-dark);
+  --stat-accent: #fff;
+  --stat-icon: #2a6b50;
+  --stat-description: #e3f2e9;
+}
+
+.admin-status-card[data-status='CLAIMED'] {
+  --stat-border: #e0e7e1;
+  --stat-surface: #f4f6f4;
+  --stat-accent: #335044;
+  --stat-icon: #e3ebe5;
+  --stat-description: #4a554f;
+}
+
+.admin-status-card__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-status-card__heading h3 {
+  margin: 0;
+  font-size: clamp(0.96rem, 1.55vw, 1.125rem);
+  line-height: 1.3;
+}
+
+.admin-status-card__icon,
+.admin-quick-link__icon,
+.admin-dashboard-notice__icon {
+  display: grid;
+  flex: none;
+  inline-size: 2.4rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: var(--stat-icon, var(--mint));
+}
+
+.admin-status-card__count {
+  padding-block-start: 0.15rem;
+  font-size: clamp(1.85rem, 3.5vw, 2.65rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.admin-status-card__count span {
+  margin-inline-start: 0.15rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.admin-status-card__description {
+  color: var(--stat-description);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.admin-dashboard__empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-start: 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid #dce9df;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--green-dark);
+  font-size: 0.9375rem;
+}
+
+.admin-dashboard__empty svg {
+  flex: none;
+}
+
+.admin-dashboard__quick > h2 {
+  margin-block-end: 0.8rem;
+}
+
+.admin-dashboard__quick ul {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-quick-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+  min-block-size: 100%;
+  padding: clamp(0.85rem, 1.8vw, 1.15rem);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: #fff;
+}
+
+.admin-quick-link:hover {
+  border-color: #a7cdb6;
+  background: #fafefa;
+}
+
+.admin-quick-link__icon,
+.admin-dashboard-notice__icon {
+  color: var(--green);
+}
+
+.admin-quick-link__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.45rem;
+  margin-block: 0.05rem 0.25rem;
+}
+
+.admin-quick-link__heading h3 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.admin-quick-link__heading span {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.admin-quick-link p {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.admin-dashboard-notice {
+  display: grid;
+  justify-items: start;
+  gap: 0.85rem;
+  padding: clamp(1.15rem, 3vw, 1.8rem);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.inner-page > h1 + .admin-dashboard-notice {
+  margin-block-start: 1.15rem;
+}
+
+.admin-dashboard-notice h2 {
+  color: var(--text);
+  font-size: clamp(1.1rem, 2.6vw, 1.3rem);
+  line-height: 1.35;
+}
+
+.admin-dashboard-notice p {
+  margin-block-start: 0.25rem;
+  color: var(--muted);
+}
+
+@media (max-width: 1100px) {
+  .admin-dashboard__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dashboard__quick ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-status-card__icon {
+    inline-size: 2rem;
+    border-radius: 0.6rem;
+  }
+
+  .admin-status-card__icon svg {
+    inline-size: 1.2rem;
+    block-size: 1.2rem;
+  }
+}

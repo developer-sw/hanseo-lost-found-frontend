@@ -1,0 +1,129 @@
+import type { ReactNode } from 'react'
+import { ADMIN_LOGIN_PATH, ADMIN_SECTIONS, type AdminSection } from '../app/adminRoutes'
+import { Icon, type IconName } from '../components/Icon'
+import type { AdminDashboardSummaryResult } from '../types/adminDashboard'
+import type { FoundItemStatus } from '../types/foundItem'
+import '../styles/admin-dashboard.css'
+
+type DashboardState = AdminDashboardSummaryResult | { status: 'loading' }
+type NoticeStatus = Exclude<DashboardState, { status: 'ready' }>['status']
+
+interface AdminDashboardPageProps {
+  state: DashboardState
+  getHref: (section: AdminSection) => string
+  onRetry: () => void
+  demoControl?: ReactNode
+}
+
+const statusCards = [
+  { status: 'STORED', label: '보관중', icon: 'box', description: '습득자가 직접 보관하며 수령 신청을 기다리는 물품입니다.' },
+  { status: 'CLAIM_REQUESTED', label: '수령신청', icon: 'clipboard', description: '신청이 접수되어 소유 증빙을 검토할 물품입니다. 추가 신청이 가능합니다.' },
+  { status: 'AWAITING_PICKUP', label: '수령대기', icon: 'clock', description: '주인이 확정되어 직접 전달을 기다리는 물품입니다. 신규 신청은 마감되었습니다.' },
+  { status: 'CLAIMED', label: '수령완료', icon: 'circle-check', description: '분실자가 물품을 받은 뒤 ‘받았어요’로 확인했습니다.' },
+] satisfies { status: FoundItemStatus; label: string; icon: IconName; description: string }[]
+
+const quickLinks = ADMIN_SECTIONS.filter(({ id }) => id !== 'dashboard')
+
+const notices: Record<NoticeStatus, { title: string; description: string; icon: IconName }> = {
+  loading: { title: '습득물 통계를 불러오는 중입니다.', description: '잠시만 기다려 주세요.', icon: 'clock' },
+  'sign-in-required': { title: '관리자 로그인이 필요합니다.', description: '관리자 계정으로 로그인해 주세요.', icon: 'user' },
+  expired: { title: '로그인 세션이 만료되었습니다.', description: '관리자 계정으로 다시 로그인해 주세요.', icon: 'clock' },
+  forbidden: { title: '관리자 권한이 필요합니다.', description: '이 화면은 관리자 계정만 이용할 수 있습니다.', icon: 'shield-check' },
+  error: { title: '습득물 통계를 불러오지 못했습니다.', description: '잠시 후 다시 시도해 주세요.', icon: 'info' },
+  unavailable: { title: '관리자 API가 아직 연결되지 않았습니다.', description: '서버 연동 후 권한과 습득물 통계를 확인할 수 있습니다.', icon: 'info' },
+}
+
+const countFormat = new Intl.NumberFormat('ko-KR')
+
+export function AdminDashboardNotice({ status, onRetry }: { status: NoticeStatus; onRetry: () => void }) {
+  const { title, description, icon } = notices[status]
+
+  return (
+    <section className="admin-dashboard-notice" aria-labelledby="admin-dashboard-notice-title">
+      <span className="admin-dashboard-notice__icon"><Icon name={icon} size={24} /></span>
+      <div role={status === 'loading' ? 'status' : undefined}>
+        <h2 id="admin-dashboard-notice-title">{title}</h2>
+        <p>{description}</p>
+      </div>
+      {status === 'error' && <button type="button" className="secondary-link" onClick={onRetry}>다시 시도</button>}
+      {(status === 'sign-in-required' || status === 'expired') && (
+        <a className="primary-link" href={ADMIN_LOGIN_PATH}>관리자 로그인</a>
+      )}
+      {status === 'forbidden' && <a className="secondary-link" href="/">학생용 메인으로 이동</a>}
+    </section>
+  )
+}
+
+function StatusSummaryCard({ card, count }: { card: typeof statusCards[number]; count: number }) {
+  return (
+    <li className="admin-status-card" data-status={card.status}>
+      <div className="admin-status-card__heading">
+        <span className="admin-status-card__icon"><Icon name={card.icon} size={22} /></span>
+        <h3>{card.label}</h3>
+      </div>
+      <p className="admin-status-card__count">{countFormat.format(count)}<span>건</span></p>
+      <p className="admin-status-card__description">{card.description}</p>
+    </li>
+  )
+}
+
+function AdminQuickLinks({ getHref }: Pick<AdminDashboardPageProps, 'getHref'>) {
+  return (
+    <section className="admin-dashboard__quick" aria-labelledby="admin-quick-title">
+      <h2 id="admin-quick-title">관리자 업무 바로가기</h2>
+      <ul role="list">
+        {quickLinks.map(({ id: section, label, icon, description }) => (
+          <li key={section}>
+            <a className="admin-quick-link" href={getHref(section)}>
+              <span className="admin-quick-link__icon"><Icon name={icon} size={21} /></span>
+              <div>
+                <div className="admin-quick-link__heading">
+                  <h3>{label}</h3>
+                  <span>준비 중</span>
+                </div>
+                <p>{description}</p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+export function AdminDashboardPage({ state, getHref, onRetry, demoControl }: AdminDashboardPageProps) {
+  return (
+    <div className="admin-dashboard">
+      <header className="admin-dashboard__heading">
+        <h1>관리자 대시보드</h1>
+        <p>교내 습득물의 등록 및 수령 처리 현황을 확인하세요.</p>
+      </header>
+      {demoControl}
+
+      {state.status === 'ready' ? (
+        <>
+          <section className="admin-dashboard__summary" aria-labelledby="admin-summary-title">
+            <div className="admin-dashboard__summary-heading">
+              <h2 id="admin-summary-title">습득물 처리 현황</h2>
+              <p className="admin-dashboard__total">전체 습득물 <strong>{countFormat.format(state.summary.total)}건</strong></p>
+            </div>
+            <ul className="admin-dashboard__stats" role="list">
+              {statusCards.map((card) => (
+                <StatusSummaryCard key={card.status} card={card} count={state.summary.counts[card.status]} />
+              ))}
+            </ul>
+            {state.summary.total === 0 && (
+              <p className="admin-dashboard__empty" role="status">
+                <Icon name="info" size={19} />
+                등록된 습득물이 없습니다.
+              </p>
+            )}
+          </section>
+          <AdminQuickLinks getHref={getHref} />
+        </>
+      ) : (
+        <AdminDashboardNotice status={state.status} onRetry={onRetry} />
+      )}
+    </div>
+  )
+}
