@@ -1,0 +1,193 @@
+.found-report-page .found-custody {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.8rem;
+  margin-block-end: clamp(1.15rem, 3vw, 1.75rem);
+  padding: 0.9rem clamp(0.75rem, 2.2vw, 1.1rem);
+  border: 1px solid #dcebe0;
+  border-radius: 1rem;
+  background: #f8fbf8;
+}
+
+.found-report-page .found-custody > svg {
+  inline-size: 2.45rem;
+  block-size: 2.45rem;
+  padding: 0.5rem;
+  border-radius: 0.7rem;
+  background: var(--mint);
+  color: var(--green);
+}
+
+.found-report-page .found-custody h2 {
+  color: var(--green-dark);
+  font-size: 1.0625rem;
+  font-weight: 780;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.found-report-page .found-custody p {
+  margin-block-start: 0.3rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.found-report-page .found-photo {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.42rem;
+  min-inline-size: 0;
+  scroll-margin-block: 1rem calc(5rem + env(safe-area-inset-bottom));
+}
+
+.found-report-page .found-photo__label {
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 740;
+}
+
+.found-report-page .found-photo__zone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  min-inline-size: 0;
+  min-block-size: 8rem;
+  padding: clamp(0.8rem, 2.3vw, 1.25rem);
+  border: 1px dashed #9dc5aa;
+  border-radius: 0.95rem;
+  background: #f6faf6;
+}
+
+.found-report-page .found-photo__zone:focus-within {
+  outline: 2px solid #a4cbb0;
+  outline-offset: 2px;
+}
+
+.found-report-page .found-photo__zone[data-ready='true'] { border-style: solid; }
+
+.found-report-page .found-photo__zone[data-invalid='true'] {
+  border-color: #b64540;
+  background: #fff9f8;
+  outline-color: #edc5c2;
+}
+
+.found-report-page .found-photo .found-photo__zone[data-dragging='true'] {
+  border-color: var(--green);
+  background: #e6f4e8;
+}
+
+.found-report-page .found-photo__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 0.8rem;
+  background: #e5f2e7;
+  color: var(--green);
+}
+
+.found-report-page .found-photo__details {
+  display: grid;
+  flex: 1 1 15rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.24rem;
+  min-inline-size: 0;
+}
+
+.found-report-page .found-photo__title { color: var(--green-dark); font-weight: 740; }
+.found-report-page .found-photo__description { color: var(--muted); font-size: 0.875rem; }
+
+.found-report-page .found-photo__preview {
+  display: block;
+  flex: 0 1 auto;
+  inline-size: min(100%, clamp(5.25rem, 14vw, 8.5rem));
+  block-size: auto;
+  aspect-ratio: 1;
+  margin: 0;
+  border: 1px solid #dcebe0;
+  border-radius: 0.75rem;
+  background: #fff;
+  object-fit: contain;
+}
+
+.found-report-page .found-photo__name,
+.found-report-page .found-report-review__photo figcaption {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.found-report-page .found-photo__name { font-weight: 720; }
+
+.found-report-page .found-photo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  min-inline-size: 0;
+  margin-block-start: 0.35rem;
+}
+
+.found-report-page .found-photo__actions > button {
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  padding-inline: clamp(0.75rem, 2vw, 1rem);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.found-report-page .found-photo__remove {
+  border: 1px solid #e4d9d8;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #893932;
+  font-weight: 700;
+}
+
+.found-report-page .found-photo__remove:hover { background: #fbefed; }
+
+.found-report-page .found-photo__hint,
+.found-report-page .found-photo__error {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.found-report-page .found-photo__error { color: #a3332f; }
+
+.found-report-page .found-report-review__photo {
+  display: grid;
+  gap: 0.45rem;
+  inline-size: min(100%, 17rem);
+  margin: 1rem 0 0;
+}
+
+.found-report-page .found-report-review__photo img {
+  inline-size: 100%;
+  block-size: clamp(8rem, 25vw, 12.5rem);
+  padding: 0.35rem;
+  border: 1px solid #dcebe0;
+  border-radius: 0.8rem;
+  background: #fff;
+  object-fit: contain;
+}
+
+.found-report-page .found-report-review__photo figcaption {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 767px) {
+  .found-report-page .found-custody { gap: 0.6rem; }
+  .found-report-page .found-custody > svg { inline-size: 2.15rem; block-size: 2.15rem; padding: 0.44rem; }
+  .found-report-page .found-photo__zone { gap: 0.65rem; }
+  .found-report-page .found-photo__details { flex-basis: 8.5rem; }
+  .found-report-page .found-photo__actions > button { flex: 1 1 5.5rem; }
+}

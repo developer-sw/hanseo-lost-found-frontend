@@ -2,6 +2,9 @@ import { campusBuildings } from '../data/campusBuildings'
 import { CATEGORY_LABELS } from '../data/categories'
 import type { FoundCategory } from '../types/foundItem'
 import type { LostReportFields, LostReportRequest } from '../types/lostReport'
+import { parseKoreanDateTimeInput } from './reportDateTime'
+
+export { formatKoreanDateTimeInput } from './reportDateTime'
 
 export const LOCATION_DETAIL_MAX_LENGTH = 100
 
@@ -10,22 +13,6 @@ export type LostReportErrors = Partial<Record<keyof LostReportFields, string>>
 type LostReportValidationResult =
   | { status: 'invalid'; errors: LostReportErrors }
   | { status: 'valid'; request: LostReportRequest }
-
-const koreaOffsetMs = 9 * 60 * 60 * 1000
-const dateTimeInputPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
-
-export function formatKoreanDateTimeInput(date: Date) {
-  return new Date(date.getTime() + koreaOffsetMs).toISOString().slice(0, 16)
-}
-
-function parseKoreanDateTimeInput(value: string) {
-  if (!dateTimeInputPattern.test(value) || value.startsWith('0000')) return undefined
-
-  const timestamp = Date.parse(`${value}:00Z`) - koreaOffsetMs
-  if (!Number.isFinite(timestamp) || formatKoreanDateTimeInput(new Date(timestamp)) !== value) return undefined
-
-  return timestamp
-}
 
 function isFoundCategory(categoryId: string): categoryId is FoundCategory {
   return Object.hasOwn(CATEGORY_LABELS, categoryId)

@@ -5,6 +5,7 @@ import { SignupForm } from '../components/SignupForm'
 import { foundItems } from '../data/foundItems'
 import { AuthPage } from '../pages/AuthPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
+import { FoundReportPage } from '../pages/FoundReportPage'
 import { GuidePage } from '../pages/GuidePage'
 import { HomePage } from '../pages/HomePage'
 import { LostReportPage } from '../pages/LostReportPage'
@@ -34,7 +35,7 @@ function renderPage(pathname: string, params: URLSearchParams) {
     case MATCH_DEMO_PATH:
       return <DemoMatchResultsPage params={params} />
     case '/report/found':
-      return <PendingPage title="습득물 등록" message="습득물 등록 양식을 준비 중입니다. 등록할 때 습득한 건물과 사진이 필요합니다." />
+      return <FoundReportPage />
     case '/my':
       return <PendingPage title={params.get('tab') === 'claims' ? '내 수령 신청' : '내 신고·신청'} message="로그인 후 내 신고와 수령 신청을 확인할 수 있는 화면을 준비 중입니다." />
     case '/account':
