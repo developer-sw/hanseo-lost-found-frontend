@@ -7,6 +7,7 @@ import { AuthPage } from '../pages/AuthPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
 import { GuidePage } from '../pages/GuidePage'
 import { HomePage } from '../pages/HomePage'
+import { LostReportPage } from '../pages/LostReportPage'
 import { PendingPage } from '../pages/PendingPage'
 
 function renderPage(pathname: string, params: URLSearchParams) {
@@ -27,7 +28,7 @@ function renderPage(pathname: string, params: URLSearchParams) {
         </PendingPage>
       )
     case '/report/lost':
-      return <PendingPage title="분실물 신고" message="신고 양식을 준비 중입니다. 분실 신고는 등록한 학생 본인만 조회할 수 있습니다." />
+      return <LostReportPage />
     case '/report/found':
       return <PendingPage title="습득물 등록" message="습득물 등록 양식을 준비 중입니다. 등록할 때 습득한 건물과 사진이 필요합니다." />
     case '/my':

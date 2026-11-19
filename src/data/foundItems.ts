@@ -1,15 +1,9 @@
 import airpodsImage from '../assets/item-airpods.webp'
 import walletImage from '../assets/item-wallet.webp'
 import tumblerImage from '../assets/item-tumbler.webp'
-import type { FoundCategory, FoundItem } from '../types/foundItem'
+import type { FoundItem } from '../types/foundItem'
 
-export const CATEGORY_LABELS: Record<FoundCategory, string> = {
-  electronics: '전자기기',
-  wallets: '지갑·카드',
-  bags: '가방·지갑류',
-  clothing: '의류·잡화',
-  other: '기타 물품',
-}
+export { CATEGORY_LABELS } from './categories'
 
 const demoStartedAt = Date.now()
 const hourInMs = 60 * 60 * 1000

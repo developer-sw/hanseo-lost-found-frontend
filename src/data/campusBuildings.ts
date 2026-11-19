@@ -1,0 +1,20 @@
+// Seosan campus map codes identify mock entries until the server provides building IDs.
+export const campusBuildings: { id: string; name: string }[] = [
+  { id: 'mock-seosan-h01', name: '이학관' },
+  { id: 'mock-seosan-h02', name: '영암관' },
+  { id: 'mock-seosan-h03', name: '보건의료학관' },
+  { id: 'mock-seosan-h04', name: '청곡관(학생회관)' },
+  { id: 'mock-seosan-h05', name: '건축토목공학관' },
+  { id: 'mock-seosan-h06', name: '인곡2관(제2학사관)' },
+  { id: 'mock-seosan-h07', name: '연암도서관' },
+  { id: 'mock-seosan-h08', name: '인곡관(제1학사관)' },
+  { id: 'mock-seosan-h09', name: '학군단(ROTC)' },
+  { id: 'mock-seosan-h10', name: '공학관' },
+  { id: 'mock-seosan-h11', name: '인문사회관' },
+  { id: 'mock-seosan-h12', name: '심운관' },
+  { id: 'mock-seosan-h13', name: '산학협력관' },
+  { id: 'mock-seosan-h14', name: '예술관' },
+  { id: 'mock-seosan-h15', name: '영암체육관' },
+  { id: 'mock-seosan-h16', name: '자악관' },
+  { id: 'mock-seosan-other', name: '기타' },
+]
