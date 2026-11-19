@@ -13,9 +13,9 @@ export interface FoundItem {
 
 export type FoundItemStatus = 'STORED' | 'CLAIM_REQUESTED' | 'AWAITING_PICKUP' | 'CLAIMED'
 
-export type FoundItemClaimEligibility =
-  | { status: 'allowed' | 'sign-in-required' | 'own-item' | 'already-requested' | 'rejected' }
-  | { status: 'cancelled'; canReapply: boolean }
+export type FoundItemClaimEligibility = {
+  status: 'allowed' | 'sign-in-required' | 'own-item' | 'already-requested' | 'rejected' | 'cancelled'
+}
 
 export interface FoundItemDetail extends FoundItem {
   status: FoundItemStatus

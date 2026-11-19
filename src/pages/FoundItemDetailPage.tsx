@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getFoundItemNavigation } from '../app/foundItemRoutes'
+import { ClaimRequestDialog } from '../components/ClaimRequestDialog'
 import { FoundItemPhoto } from '../components/FoundItemPhoto'
 import { Icon, type IconName } from '../components/Icon'
 import { KoreanDateTime } from '../components/KoreanDateTime'
@@ -11,10 +12,6 @@ import '../styles/found-item-detail.css'
 type DetailNavigation = ReturnType<typeof getFoundItemNavigation>
 type ReadyDetail = Extract<FoundItemDetailResult, { status: 'ready' }>
 type DetailView = FoundItemDetailResult | { status: 'loading' | 'invalid-url' }
-
-type ClaimRequestContext =
-  | { foundItemId: string; source: 'search' }
-  | { foundItemId: string; source: 'match'; lostReportId: string }
 
 const statuses: Record<FoundItemStatus, { label: string; icon: IconName; custody: string; unavailable?: string }> = {
   STORED: {
@@ -42,14 +39,13 @@ const eligibilityMessages = {
   'own-item': '본인이 등록한 습득물에는 수령을 신청할 수 없습니다.',
   'already-requested': '이미 이 습득물에 수령을 신청했습니다.',
   rejected: '이전에 거절된 습득물에는 다시 신청할 수 없습니다.',
-  cancelled: '취소한 신청은 현재 다시 제출할 수 없습니다.',
+  cancelled: '신청을 취소한 뒤에는 같은 물품에 다시 신청할 수 없습니다.',
 }
 
 function getClaimUnavailable(detail: ReadyDetail) {
   const { status, claimEligibility } = detail.item
   if (statuses[status].unavailable) return statuses[status].unavailable
   if (detail.source !== 'api' || !claimEligibility || claimEligibility.status === 'allowed') return
-  if (claimEligibility.status === 'cancelled' && claimEligibility.canReapply) return
   return eligibilityMessages[claimEligibility.status]
 }
 
@@ -62,23 +58,18 @@ function StatusBadge({ status }: { status: FoundItemStatus }) {
   )
 }
 
-function DetailContent({ detail, navigation, onClaim }: {
+function DetailContent({ detail, navigation }: {
   detail: ReadyDetail
   navigation: DetailNavigation
-  onClaim?: (context: ClaimRequestContext) => void
 }) {
   const { item, source } = detail
-  const { claimContext } = navigation
-  const [showClaimNotice, setShowClaimNotice] = useState(false)
+  const [claimOpen, setClaimOpen] = useState(false)
+  const claimTrigger = useRef<HTMLButtonElement>(null)
   const unavailable = getClaimUnavailable(detail)
 
-  function handleClaim() {
-    if (unavailable) return
-    if (onClaim && source === 'api' && claimContext.source !== 'match-demo') {
-      onClaim({ ...claimContext, foundItemId: item.id })
-      return
-    }
-    setShowClaimNotice(true)
+  function closeClaim() {
+    setClaimOpen(false)
+    claimTrigger.current?.focus()
   }
 
   return (
@@ -119,14 +110,30 @@ function DetailContent({ detail, navigation, onClaim }: {
         </aside>
 
         <div className="found-detail__claim">
-          <button type="button" className="primary-link" onClick={handleClaim} disabled={Boolean(unavailable)} aria-describedby={unavailable ? 'found-detail-claim-blocked' : undefined}>
+          <button
+            ref={claimTrigger}
+            type="button"
+            className="primary-link"
+            aria-haspopup="dialog"
+            aria-describedby={unavailable ? 'found-detail-claim-blocked' : undefined}
+            disabled={Boolean(unavailable)}
+            onClick={() => setClaimOpen(true)}
+          >
             <Icon name="clipboard" size={19} />수령 신청하기
           </button>
           {unavailable && <p id="found-detail-claim-blocked">{unavailable}</p>}
-          <div className="found-detail__claim-notice" role="status">
-            {showClaimNotice && <p><Icon name="info" size={18} />수령 신청 기능은 준비 중입니다.</p>}
-          </div>
         </div>
+
+        {claimOpen && !unavailable && (
+          <ClaimRequestDialog
+            item={item}
+            source={source}
+            context={navigation.claimContext}
+            statusBadge={<StatusBadge status={item.status} />}
+            onClose={closeClaim}
+            onCreated={() => window.location.assign('/my?tab=claims')}
+          />
+        )}
       </div>
     </article>
   )
@@ -155,10 +162,9 @@ function DetailNotice({ status, onRetry }: { status: NoticeStatus; onRetry: () =
   )
 }
 
-export function FoundItemDetailPage({ itemId, params, onClaim }: {
+export function FoundItemDetailPage({ itemId, params }: {
   itemId?: string
   params: URLSearchParams
-  onClaim?: (context: ClaimRequestContext) => void
 }) {
   const [detail, setDetail] = useState<DetailView>({ status: 'loading' })
   const [attempt, setAttempt] = useState(0)
@@ -200,7 +206,7 @@ export function FoundItemDetailPage({ itemId, params, onClaim }: {
           {view.source === 'demo' && (
             <p className="found-detail__demo"><Icon name="info" size={17} />데모 모드 · 예시 습득물 정보입니다.</p>
           )}
-          <DetailContent detail={view} navigation={navigation} onClaim={onClaim} />
+          <DetailContent detail={view} navigation={navigation} />
         </>
       ) : <DetailNotice status={view.status} onRetry={retry} />}
     </main>

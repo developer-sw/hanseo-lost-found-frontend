@@ -240,8 +240,7 @@
   color: var(--green-dark);
 }
 
-.found-detail__custody > svg,
-.found-detail__claim-notice svg { flex-shrink: 0; }
+.found-detail__custody > svg { flex-shrink: 0; }
 
 .found-detail__custody p,
 .found-detail__claim > p { color: var(--muted); font-size: 0.9375rem; }
@@ -261,18 +260,6 @@
 }
 
 .found-detail__claim > p { margin-top: 0.45rem; }
-
-.found-detail__claim-notice p {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.6rem;
-  padding: 0.65rem 0.8rem;
-  border-radius: 0.65rem;
-  background: var(--mint);
-  color: var(--green-dark);
-  font-size: 0.9375rem;
-}
 
 .found-detail__notice {
   display: grid;

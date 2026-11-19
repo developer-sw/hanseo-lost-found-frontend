@@ -15,14 +15,14 @@ export const MATCH_DEMO_SCENARIOS = {
 
 export type MatchDemoScenario = keyof typeof MATCH_DEMO_SCENARIOS
 
-const demoReport: MatchReportSummary = {
+export const demoMatchReport = {
   itemName: '에어팟 프로 (검정색 케이스)',
   categoryId: 'electronics',
   lostAt: '2026-11-17T04:30:00.000Z',
   buildingName: '인문사회관',
   locationDetail: '2층 강의실 앞',
   status: 'OPEN',
-}
+} satisfies MatchReportSummary
 
 // The order, scores and reasons are demo fixtures. Item facts come from the shared catalog.
 const demoDetails: readonly Pick<MatchCandidate, 'id' | 'score' | 'reasons'>[] = [
@@ -61,7 +61,7 @@ export function getDemoMatchState(scenario: MatchDemoScenario): MatchViewState {
     case 'empty':
       return {
         status: 'ready',
-        result: { report: demoReport, candidates: demoCandidates.slice(0, candidateCounts[scenario]) },
+        result: { report: demoMatchReport, candidates: demoCandidates.slice(0, candidateCounts[scenario]) },
       }
     default:
       return { status: scenario }
