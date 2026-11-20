@@ -65,7 +65,29 @@
   text-decoration: none;
 }
 
+.site-header__report {
+  position: relative;
+  display: flex;
+}
+
+.site-header__report-trigger {
+  display: inline-flex;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+}
+
+.site-header__report-trigger svg {
+  flex: none;
+}
+
+.site-header__report-trigger[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
 .site-header__link:hover,
+.site-header__report-trigger[aria-expanded='true'],
 .site-header__notifications:hover,
 .site-header__account:hover,
 .site-header__actions [aria-current='page'] {
@@ -76,6 +98,65 @@
 .site-header__link[aria-current='page'] {
   background: var(--green, #005b38);
   color: #fff;
+}
+
+.site-header__report-panel {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-start: 50%;
+  inline-size: 15rem;
+  padding: 0.4rem;
+  border: 1px solid var(--line, #e6ede8);
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 10px 24px rgb(24 59 41 / 14%);
+  transform: translateX(-50%);
+}
+
+.site-header__report-panel:not([hidden]) {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.site-header__report-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem;
+  border-radius: 0.65rem;
+  color: var(--text, #171c19);
+  text-decoration: none;
+}
+
+.site-header__report-option:hover,
+.site-header__report-option:focus-visible {
+  background: #edf6ee;
+}
+
+.site-header__report-icon {
+  display: grid;
+  flex: 0 0 2.25rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: var(--mint, #e8f5e8);
+  color: var(--green, #005b38);
+}
+
+.site-header__report-copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.site-header__report-copy strong {
+  font-size: 0.9375rem;
+}
+
+.site-header__report-copy > span {
+  color: var(--muted, #52635a);
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 
 .site-header__actions {
@@ -114,7 +195,7 @@
   color: var(--green, #005b38);
 }
 
-.site-header a:focus-visible,
+.site-header :is(a, button):focus-visible,
 .mobile-navigation a:focus-visible {
   outline: 2px solid var(--green, #005b38);
   outline-offset: 3px;

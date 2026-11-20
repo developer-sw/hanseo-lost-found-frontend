@@ -44,7 +44,6 @@ export function getFoundSearchParams(params: URLSearchParams) {
     const value = params.get(key)?.trim()
     if (value) search.set(key, value)
   }
-  if (params.get('view') === 'recent') search.set('view', 'recent')
   return search
 }
 
