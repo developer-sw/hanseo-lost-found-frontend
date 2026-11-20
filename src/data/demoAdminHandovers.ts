@@ -9,6 +9,7 @@ import type { AdminFoundItem } from '../types/adminItems'
 import { campusBuildings } from './campusBuildings'
 import { getDemoAdminClaims, getDemoClaimHandoverPreview } from './demoAdminClaims'
 import { getDemoAdminItem } from './demoAdminItems'
+import { demoHandoverBuildingId, demoHandoverCases } from './demoHandoverCases'
 
 interface DemoHandoverOptions {
   empty?: boolean
@@ -17,7 +18,7 @@ interface DemoHandoverOptions {
 }
 
 const demoFinderReadyUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString()
-const recommendedBuilding = campusBuildings.find(({ id }) => id === 'mock-seosan-h08')
+const recommendedBuilding = campusBuildings.find(({ id }) => id === demoHandoverBuildingId)
 
 function getSharedHandover(
   foundItemId: string,
@@ -40,13 +41,14 @@ function getSharedHandover(
 
 function getDemoRecords(missingBuilding: boolean): AdminHandover[] {
   const records: AdminHandover[] = []
-  const wallet = getSharedHandover('black-wallet', 'AWAITING_PICKUP', 'APPROVED')
+  const walletCase = demoHandoverCases.wallet
+  const wallet = getSharedHandover(walletCase.foundItemId, walletCase.itemStatus, walletCase.claimStatus)
   if (wallet?.handoverId) {
     records.push({
       handoverId: wallet.handoverId,
       item: wallet.item,
-      claim: { ...wallet.claim, confirmedAt: '2026-11-19T08:15:00.000Z' },
-      status: 'WAITING',
+      claim: { ...wallet.claim, confirmedAt: walletCase.confirmedAt },
+      status: walletCase.status,
       finderReadyUntil: demoFinderReadyUntil,
       ownerReadyUntil: null,
     })
@@ -81,17 +83,18 @@ function getDemoRecords(missingBuilding: boolean): AdminHandover[] {
     })
   }
 
-  const tumbler = getSharedHandover('tumbler', 'CLAIMED', 'COMPLETED')
-  if (tumbler) {
+  const tumblerCase = demoHandoverCases.tumbler
+  const tumbler = getSharedHandover(tumblerCase.foundItemId, tumblerCase.itemStatus, tumblerCase.claimStatus)
+  if (tumbler?.handoverId) {
     records.push({
-      handoverId: 'demo-a4-handover-tumbler',
+      handoverId: tumbler.handoverId,
       item: tumbler.item,
-      claim: { ...tumbler.claim, confirmedAt: '2026-11-19T04:50:00.000Z' },
-      status: 'DONE',
+      claim: { ...tumbler.claim, confirmedAt: tumblerCase.confirmedAt },
+      status: tumblerCase.status,
       buildingId: recommendedBuilding?.id,
       buildingName: recommendedBuilding?.name,
-      placeSetAt: '2026-11-19T05:00:00.000Z',
-      completedAt: '2026-11-19T05:20:00.000Z',
+      placeSetAt: tumblerCase.placeSetAt,
+      completedAt: tumblerCase.completedAt,
     })
   }
 

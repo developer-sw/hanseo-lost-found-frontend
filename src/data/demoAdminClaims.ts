@@ -1,6 +1,7 @@
 import type { AdminClaim, AdminClaimGroup, AdminClaimReviewAction, AdminClaimReviewResult, AdminClaimsResult } from '../types/adminClaims'
 import { canReviewAdminClaim, hasConfirmedAdminClaim } from '../utils/adminClaimReview'
 import { getDemoAdminItems } from './demoAdminItems'
+import { demoHandoverCases } from './demoHandoverCases'
 
 const demoClaimsByItem: Readonly<Record<string, readonly AdminClaim[] | undefined>> = {
   'white-wireless-earbuds': [
@@ -29,24 +30,24 @@ const demoClaimsByItem: Readonly<Record<string, readonly AdminClaim[] | undefine
       linkedLostItemId: null,
     },
   ],
-  'black-wallet': [
+  [demoHandoverCases.wallet.foundItemId]: [
     {
-      id: 'demo-a3-wallet-a',
+      id: demoHandoverCases.wallet.claimId,
       applicant: { name: '가상 학생 D', accountId: 'DEMO-A3-D' },
-      requestedAt: '2026-11-19T07:50:00.000Z',
-      status: 'APPROVED',
+      requestedAt: demoHandoverCases.wallet.requestedAt,
+      status: demoHandoverCases.wallet.claimStatus,
       ownershipProof: '지갑 안쪽 접히는 부분에 흰 실로 꿰맨 자국이 세 곳 있습니다.',
-      linkedLostItemId: 'demo-a3-lost-wallet-a',
+      linkedLostItemId: demoHandoverCases.wallet.lostItemId,
     },
   ],
-  tumbler: [
+  [demoHandoverCases.tumbler.foundItemId]: [
     {
-      id: 'demo-a3-tumbler-a',
+      id: demoHandoverCases.tumbler.claimId,
       applicant: { name: '가상 학생 E', accountId: 'DEMO-A3-E' },
-      requestedAt: '2026-11-19T04:30:00.000Z',
-      status: 'COMPLETED',
+      requestedAt: demoHandoverCases.tumbler.requestedAt,
+      status: demoHandoverCases.tumbler.claimStatus,
       ownershipProof: '바닥 안쪽 가장자리에 반달 모양으로 옅게 벗겨진 부분이 있습니다.',
-      linkedLostItemId: null,
+      linkedLostItemId: demoHandoverCases.tumbler.lostItemId,
     },
   ],
   'black-bluetooth-earbud-case': [
@@ -81,7 +82,10 @@ export function getDemoAdminClaims(foundItemId?: string, { empty = false }: { em
     const claims = empty ? [] : demoClaimsByItem[item.id] ?? []
     if (!claims.length && foundItemId === undefined) return []
 
-    const handoverId = claims.some(({ status }) => status === 'APPROVED') ? getDemoHandoverId(item.id) : undefined
+    const shared = Object.values(demoHandoverCases).find(({ foundItemId, claimId }) => (
+      foundItemId === item.id && claims.some((claim) => claim.id === claimId)
+    ))
+    const handoverId = shared?.handoverId ?? (claims.some(({ status }) => status === 'APPROVED') ? getDemoHandoverId(item.id) : undefined)
     return [{ item, claims, handoverId }]
   })
   groups.sort((left, right) => Number(right.item.status === 'CLAIM_REQUESTED') - Number(left.item.status === 'CLAIM_REQUESTED'))

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { ActiveHandoverShortcut } from '../components/ActiveHandoverShortcut'
 import { Header } from '../components/Header'
 import { LoginForm } from '../components/LoginForm'
 import { MobileBottomNavigation } from '../components/MobileBottomNavigation'
@@ -9,6 +10,7 @@ import { FoundItemDetailPage } from '../pages/FoundItemDetailPage'
 import { FoundItemsPage } from '../pages/FoundItemsPage'
 import { FoundReportPage } from '../pages/FoundReportPage'
 import { GuidePage } from '../pages/GuidePage'
+import { HandoverPage, HandoverPageNotice } from '../pages/HandoverPage'
 import { HomePage } from '../pages/HomePage'
 import { LostReportPage } from '../pages/LostReportPage'
 import { DemoMatchResultsPage, ReportMatchResultsPage } from '../pages/MatchResultsPage'
@@ -16,11 +18,21 @@ import { MyActivityPage } from '../pages/MyActivityPage'
 import { PendingPage } from '../pages/PendingPage'
 import { getAdminSection } from './adminRoutes'
 import { getFoundItemId } from './foundItemRoutes'
+import { getHandoverId, HANDOVER_DEMO_PATH } from './handoverRoutes'
 import { getMatchReportId, MATCH_DEMO_PATH } from './matchRoutes'
 
 const AdminDemoPage = import.meta.env.DEV ? lazy(() => import('../pages/AdminDemoPage')) : undefined
+const HandoverDemoPage = import.meta.env.DEV ? lazy(() => import('../pages/HandoverDemoPage')) : undefined
 
 function renderPage(pathname: string, params: URLSearchParams) {
+  if (HandoverDemoPage && pathname === HANDOVER_DEMO_PATH) {
+    return (
+      <Suspense fallback={<HandoverPageNotice status="loading" />}>
+        <HandoverDemoPage params={params} />
+      </Suspense>
+    )
+  }
+
   switch (pathname) {
     case '/':
       return <HomePage />
@@ -68,6 +80,9 @@ function renderPage(pathname: string, params: URLSearchParams) {
         return <FoundItemDetailPage key={itemId} itemId={itemId} params={params} />
       }
 
+      const handoverId = getHandoverId(pathname)
+      if (handoverId) return <HandoverPage key={handoverId} handoverId={handoverId} />
+
       return <PendingPage title="페이지를 찾을 수 없습니다" message="주소를 확인하거나 홈으로 돌아가 주세요." />
     }
   }
@@ -96,6 +111,7 @@ export function App() {
       <a className="skip-link" href="#main-content">본문으로 바로 이동</a>
       <Header pathname={pathname} search={search} />
       {renderPage(pathname, params)}
+      {!pathname.startsWith('/handover/') && <ActiveHandoverShortcut />}
       <MobileBottomNavigation pathname={pathname} search={search} />
     </>
   )

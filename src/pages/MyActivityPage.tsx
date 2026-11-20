@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getFoundItemPath } from '../app/foundItemRoutes'
+import { getDemoHandoverPath, getHandoverPath } from '../app/handoverRoutes'
 import { getMatchResultPath, MATCH_DEMO_PATH } from '../app/matchRoutes'
 import { getMyActivityPath, getMyActivityTab, type MyActivityTab } from '../app/myActivityRoutes'
 import { FoundReportForm } from '../components/FoundReportForm'
@@ -211,7 +212,7 @@ export function MyActivityPage({ params }: { params: URLSearchParams }) {
         <>
           {data.source === 'demo' && (
             <div className="my-activity__demo">
-              <p><Icon name="info" size={18} /><span><strong>데모 모드</strong> · 예시 계정과 목록입니다. 수정·삭제·취소는 서버에 저장되지 않습니다.</span></p>
+              <p><Icon name="info" size={18} /><span><strong>데모 모드</strong> · 예시 계정과 목록입니다. 수정·삭제·취소는 서버에 저장되지 않습니다.{import.meta.env.DEV && tab !== 'lost' && ' 전달 예시는 탭별로 습득자와 확정된 주인 역할을 시연합니다.'}</span></p>
               <div className="my-activity__demo-links">
                 <a href={getMyActivityPath(tab, { empty: !empty })}>{empty ? '예시 목록 보기' : '빈 목록 보기'}</a>
                 <a href={getMyActivityPath(tab, { account: true })}>실제 계정 이용</a>
@@ -234,6 +235,8 @@ export function MyActivityPage({ params }: { params: URLSearchParams }) {
               getLostMatchHref={getLostMatchHref}
               getEditHref={(kind, id) => getMyActivityPath(kind, { account, edit: id })}
               getDetailHref={(kind, id) => getFoundItemPath(id, { source: 'my', tab: kind, account })}
+              getHandoverHref={data.source === 'api' ? getHandoverPath
+                : import.meta.env.DEV ? (id) => getDemoHandoverPath(id, tab === 'found' ? 'finder' : 'owner') : undefined}
               onAction={openConfirmation}
             />
           </section>

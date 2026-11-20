@@ -5,6 +5,7 @@ import tumblerImage from '../assets/item-tumbler.webp'
 import wirelessEarbudsImage from '../assets/item-wireless-earbuds.webp'
 import type { FoundItemDetail } from '../types/foundItem'
 import type { MyActivity, MyClaim, MyFoundReport, MyLostReport } from '../types/myActivity'
+import { demoHandoverCases } from './demoHandoverCases'
 import { demoMatchReport } from './demoMatches'
 import { demoFoundItemDetails } from './foundItems'
 
@@ -38,7 +39,12 @@ const ownedDemoItems = new Map([
 
 const myFoundReports: readonly MyFoundReport[] = demoFoundItemDetails.flatMap(({ claimEligibility: _eligibility, ...item }) => {
   const ownership = ownedDemoItems.get(item.id)
-  return ownership ? [{ ...item, ...ownership }] : []
+  if (!ownership) return []
+
+  const handoverId = import.meta.env.DEV && item.id === demoHandoverCases.wallet.foundItemId
+    ? demoHandoverCases.wallet.handoverId
+    : undefined
+  return [{ ...item, ...ownership, handoverId }]
 })
 
 // These are other students' public demo items. They support S7 links from the claim examples.
@@ -137,6 +143,24 @@ const demoClaims: readonly Omit<MyClaim, 'item'>[] = [
 ]
 
 const myClaims: readonly MyClaim[] = demoClaims.flatMap((claim) => {
+  if (import.meta.env.DEV) {
+    const handover = claim.status === 'APPROVED' ? demoHandoverCases.wallet
+      : claim.status === 'COMPLETED' ? demoHandoverCases.tumbler : undefined
+    const sharedItem = handover && demoFoundItemDetails.find(({ id }) => id === handover.foundItemId)
+    if (handover && sharedItem) {
+      const { id, name, category, image } = sharedItem
+      return [{
+        id: handover.claimId,
+        foundItemId: id,
+        lostItemId: handover.lostItemId,
+        status: handover.claimStatus,
+        requestedAt: handover.requestedAt,
+        handoverId: handover.handoverId,
+        item: { id, name, category, image },
+      }]
+    }
+  }
+
   const item = demoMyClaimFoundItems.find(({ id }) => id === claim.foundItemId)
   if (!item) return []
 

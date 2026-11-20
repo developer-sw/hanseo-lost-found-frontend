@@ -186,7 +186,8 @@ export function MyActivityLists({
       {activity.claims.map((claim) => {
         const { item } = claim
         const isApproved = claim.status === 'APPROVED'
-        const handoverHref = isApproved && claim.handoverId ? getHandoverHref?.(claim.handoverId) : undefined
+        const isCompleted = claim.status === 'COMPLETED'
+        const handoverHref = (isApproved || isCompleted) && claim.handoverId ? getHandoverHref?.(claim.handoverId) : undefined
 
         return (
           <li key={claim.id}>
@@ -210,7 +211,7 @@ export function MyActivityLists({
                   </p>
                 </div>
                 <div className="my-list-card__actions">
-                  {handoverHref && <a className="primary-link" href={handoverHref}>전달 진행 보기</a>}
+                  {handoverHref && <a className="primary-link" href={handoverHref}>{isCompleted ? '완료 내역 보기' : '전달 진행 보기'}</a>}
                   <a className="secondary-link" href={getDetailHref('claims', claim.foundItemId)}>상세보기</a>
                   {claim.status === 'PENDING' && (
                     <button

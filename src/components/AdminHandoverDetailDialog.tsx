@@ -1,40 +1,13 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { CATEGORY_LABELS } from '../data/categories'
-import type { AdminHandover, AdminHandoverDetailResult, HandoverStatus } from '../types/adminHandovers'
+import type { AdminHandover, AdminHandoverDetailResult } from '../types/adminHandovers'
 import { AdminHandoverBadge, AdminHandoverItemStatus, AdminHandoverOwner, AdminHandoverPhoto, AdminHandoverPlace, AdminHandoverReceipt } from './AdminHandoverCard'
 import { AdminHandoverNotice } from './AdminHandoverNotice'
+import { HandoverTimeline } from './HandoverTimeline'
 import { Icon } from './Icon'
 import { KoreanDateTime } from './KoreanDateTime'
 
 type DetailState = AdminHandoverDetailResult | { status: 'loading' }
-type StepState = 'complete' | 'current' | 'upcoming'
-
-const steps = ['주인 확정', '이동 대기', '장소 확정', '수령완료'] as const
-const stepStates: Record<HandoverStatus, readonly StepState[]> = {
-  WAITING: ['complete', 'current', 'upcoming', 'upcoming'],
-  PLACE_SET: ['complete', 'complete', 'complete', 'upcoming'],
-  DONE: ['complete', 'complete', 'complete', 'complete'],
-}
-const stepLabels: Record<StepState, string> = { complete: '완료', current: '진행 중', upcoming: '미완료' }
-
-function AdminHandoverTimeline({ status }: { status: HandoverStatus }) {
-  return (
-    <ol className="admin-handover-timeline" aria-label="전달 단계" role="list">
-      {steps.map((label, index) => {
-        const state = stepStates[status][index]
-        return (
-          <li key={label} data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
-            <span className="admin-handover-timeline__marker" aria-hidden="true">
-              {state === 'complete' ? <Icon name="circle-check" size={18} /> : index + 1}
-            </span>
-            <strong>{label}</strong>
-            <span className="admin-handover-timeline__state">{stepLabels[state]}</span>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
 
 function readinessEnd(value: string | null | undefined) {
   if (value === null) return 0
@@ -106,7 +79,7 @@ function AdminHandoverDetail({ handover }: { handover: AdminHandover }) {
           <h3>전달 진행 단계</h3>
           <AdminHandoverBadge status={status} />
         </div>
-        <AdminHandoverTimeline status={status} />
+        <HandoverTimeline status={status} hasPlace={Boolean(handover.buildingId || handover.buildingName || handover.placeSetAt)} admin />
       </section>
       <div className="admin-handover-dialog__sections">
         <section className="admin-handover-detail__section" aria-label="주인 확정 정보">
