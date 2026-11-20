@@ -382,6 +382,17 @@
     line-height: 1.2;
   }
 
+  .home-sections :is(.process-overview__heading, .recent-found__heading) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  .home-sections :is(.process-overview__heading, .recent-found__heading) h2 {
+    font-size: clamp(1rem, 4.5vw, 1.0625rem);
+  }
+
   .process-overview__heading h2 {
     display: flex;
     align-items: center;
