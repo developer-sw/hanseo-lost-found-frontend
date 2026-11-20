@@ -25,6 +25,12 @@ export function getAdminPath(section: AdminSection, base = ADMIN_ROOT, params?: 
   return params?.size ? `${path}?${params}` : path
 }
 
+export function getAdminHandoverPath(foundItemId: string, handoverId?: string) {
+  const params = new URLSearchParams({ foundItemId })
+  if (handoverId) params.set('handoverId', handoverId)
+  return getAdminPath('handovers', ADMIN_ROOT, params)
+}
+
 export function getAdminSection(pathname: string, base = ADMIN_ROOT): AdminSection | undefined {
   const path = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
   return ADMIN_SECTIONS.find(({ segment }) => path === `${base}${segment}`)?.id

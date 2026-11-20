@@ -41,22 +41,28 @@ const itemNoticeCopy: Partial<Record<NoticeStatus, { title?: string; description
   unavailable: { description: '서버 연동 후 권한과 습득물 목록을 확인할 수 있습니다.' },
 }
 
+const claimsAccessCopy: typeof itemNoticeCopy = {
+  loading: { title: '관리자 권한을 확인하는 중입니다.' },
+  error: { title: '관리자 접속 상태를 확인하지 못했습니다.' },
+  unavailable: { description: '서버 연동 후 관리자 권한을 확인할 수 있습니다.' },
+}
+
 const countFormat = new Intl.NumberFormat('ko-KR')
 
 export function AdminDashboardNotice({ status, onRetry, resource = 'summary' }: {
   status: NoticeStatus
   onRetry: () => void
-  resource?: 'summary' | 'items'
+  resource?: 'summary' | 'items' | 'claims'
 }) {
   const { title, description, icon } = notices[status]
-  const itemCopy = resource === 'items' ? itemNoticeCopy[status] : undefined
+  const copy = resource === 'claims' ? claimsAccessCopy[status] : resource === 'items' ? itemNoticeCopy[status] : undefined
 
   return (
     <section className="admin-dashboard-notice" aria-labelledby="admin-dashboard-notice-title">
       <span className="admin-dashboard-notice__icon"><Icon name={icon} size={24} /></span>
       <div role={status === 'loading' ? 'status' : undefined}>
-        <h2 id="admin-dashboard-notice-title">{itemCopy?.title ?? title}</h2>
-        <p>{itemCopy?.description ?? description}</p>
+        <h2 id="admin-dashboard-notice-title">{copy?.title ?? title}</h2>
+        <p>{copy?.description ?? description}</p>
       </div>
       {status === 'error' && <button type="button" className="secondary-link" onClick={onRetry}>다시 시도</button>}
       {(status === 'sign-in-required' || status === 'expired') && (
@@ -95,7 +101,7 @@ function AdminQuickLinks({ getHref }: Pick<AdminDashboardPageProps, 'getHref'>) 
               <div>
                 <div className="admin-quick-link__heading">
                   <h3>{label}</h3>
-                  <span>준비 중</span>
+                  {section === 'handovers' && <span>준비 중</span>}
                 </div>
                 <p>{description}</p>
               </div>
