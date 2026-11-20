@@ -107,7 +107,7 @@ React + Vite 개발 서버를 실행한 상태에서 ngrok을 이용해 **별도
 
 ```powershell
 # 최초 1회: 대시보드에서 복사한 명령어로 인증 (토큰은 비공개)
-ngrok config add-authtoken <YOUR_NGROK_AUTHTOKEN>
+ngrok config add-authtoken "YOUR_NGROK_AUTHTOKEN"
 
 # 프론트엔드 개발 서버 실행 (터미널 1)
 npm run dev
