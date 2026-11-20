@@ -1,11 +1,14 @@
-import { useState, type ReactNode } from 'react'
-import { getAdminItemAction, getAdminItemsPath, getAdminItemStatusFilter, getAdminItemWorkSection, getAdminPath, type AdminSection } from '../app/adminRoutes'
-import { getDemoAdminClaims, getDemoClaimHandoverPreview, reviewDemoAdminClaim } from '../data/demoAdminClaims'
+import { useCallback, useState, type ReactNode } from 'react'
+import { getAdminHandoversPath, getAdminHandoversQuery, getAdminItemAction, getAdminItemsPath, getAdminItemStatusFilter, getAdminPath, type AdminSection } from '../app/adminRoutes'
+import { getDemoAdminClaims, reviewDemoAdminClaim } from '../data/demoAdminClaims'
 import { getDemoAdminSummary } from '../data/demoAdminDashboard'
+import { getDemoAdminHandover, getDemoAdminHandovers } from '../data/demoAdminHandovers'
 import { getDemoAdminItem, getDemoAdminItems } from '../data/demoAdminItems'
 import type { AdminClaimReviewAction, AdminClaimReviewResult, AdminClaimsResult } from '../types/adminClaims'
+import type { AdminHandoversQuery, AdminHandoversResult } from '../types/adminHandovers'
 import { AdminClaimsPage } from './AdminClaimsPage'
 import { AdminDashboardPage } from './AdminDashboardPage'
+import { AdminHandoversPage } from './AdminHandoversPage'
 import { AdminItemsPage } from './AdminItemsPage'
 import { AdminWorkspace } from './AdminPage'
 
@@ -16,12 +19,14 @@ const scenarioLabels = {
   loading: '로딩 중',
   error: '조회 오류',
   conflict: '심사 중 상태 충돌',
+  'missing-building': '추천 건물 정보 누락',
 } as const
 
 type DemoScenario = keyof typeof scenarioLabels
 
 function getScenario(value: string | null, section: AdminSection): DemoScenario {
   if (value === 'conflict' && section === 'claims') return value
+  if (value === 'missing-building' && section === 'handovers') return value
   return value === 'empty' || value === 'loading' || value === 'error' ? value : 'sample'
 }
 
@@ -33,17 +38,27 @@ export default function AdminDemoPage({ section, params }: { section: AdminSecti
   const scenario = getScenario(params.get('scenario'), section)
   const filter = getAdminItemStatusFilter(params.get('status'))
   const requestedId = params.get('foundItemId') ?? undefined
+  const handoverQuery = getAdminHandoversQuery(params)
+  const previewClaimId = params.get('previewClaimId') ?? undefined
   const getHref = (destination: AdminSection) => getAdminPath(destination, demoRoot)
   const pending = scenario === 'loading' || scenario === 'error' ? { status: scenario } as const : undefined
   const source = { empty: scenario === 'empty' }
   const demoControl = (
     <form className="admin-dashboard__demo-control" action={getHref(section)} method="get">
       {section === 'items' && filter !== 'all' && <input type="hidden" name="status" value={filter} />}
-      {section === 'claims' && requestedId !== undefined && <input type="hidden" name="foundItemId" value={requestedId} />}
+      {(section === 'claims' || section === 'handovers') && requestedId !== undefined && <input type="hidden" name="foundItemId" value={requestedId} />}
+      {section === 'handovers' && (
+        <>
+          {handoverQuery.filter !== 'ongoing' && <input type="hidden" name="status" value={handoverQuery.filter} />}
+          {handoverQuery.handoverId !== undefined && <input type="hidden" name="handoverId" value={handoverQuery.handoverId} />}
+          {previewClaimId !== undefined && <input type="hidden" name="previewClaimId" value={previewClaimId} />}
+        </>
+      )}
       <label htmlFor="admin-demo-scenario">데모 상태</label>
       <select id="admin-demo-scenario" name="scenario" defaultValue={scenario}>
         {Object.entries(scenarioLabels)
-          .filter(([value]) => section === 'claims' || value !== 'conflict')
+          .filter(([value]) => value !== 'conflict' || section === 'claims')
+          .filter(([value]) => value !== 'missing-building' || section === 'handovers')
           .map(([value, label]) => (
             <option key={value} value={value}>{value === 'sample' && section !== 'dashboard' ? '예시 목록' : label}</option>
           ))}
@@ -52,12 +67,6 @@ export default function AdminDemoPage({ section, params }: { section: AdminSecti
     </form>
   )
 
-  const previewClaimId = params.get('previewClaimId')
-  const preview = section === 'handovers' && requestedId && previewClaimId
-    ? getDemoClaimHandoverPreview(requestedId, previewClaimId)
-    : undefined
-  const detail = requestedId && section === 'handovers' ? getDemoAdminItem(requestedId) : undefined
-  const selectedItem = preview?.item ?? (detail?.status === 'ready' && getAdminItemWorkSection(detail.item.status) === section ? detail.item : undefined)
   const content = section === 'dashboard' ? (
     <AdminDashboardPage
       state={pending ?? { status: 'ready', summary: getDemoAdminSummary(source) }}
@@ -78,12 +87,52 @@ export default function AdminDemoPage({ section, params }: { section: AdminSecti
     />
   ) : section === 'claims' ? (
     <DemoClaimsWorkspace requestedId={requestedId} scenario={scenario} demoControl={demoControl} />
-  ) : undefined
+  ) : (
+    <DemoHandoversWorkspace query={handoverQuery} previewClaimId={previewClaimId} scenario={scenario} demoControl={demoControl} />
+  )
 
   return (
-    <AdminWorkspace section={section} base={demoRoot} demo selectedItem={selectedItem} handoverPreview={Boolean(preview)}>
+    <AdminWorkspace section={section} base={demoRoot} demo>
       {content}
     </AdminWorkspace>
+  )
+}
+
+function DemoHandoversWorkspace({ query, previewClaimId, scenario, demoControl }: {
+  query: AdminHandoversQuery
+  previewClaimId?: string
+  scenario: DemoScenario
+  demoControl: ReactNode
+}) {
+  const { filter, foundItemId } = query
+  const empty = scenario === 'empty'
+  const missingBuilding = scenario === 'missing-building'
+
+  function readList() {
+    return getDemoAdminHandovers(query, { empty, missingBuilding, previewClaimId })
+  }
+
+  const [state, setState] = useState<AdminHandoversResult | { status: 'loading' }>(() => (
+    scenario === 'loading' || scenario === 'error' ? { status: scenario } : readList()
+  ))
+  const previewId = previewClaimId !== undefined && state.status === 'ready' ? state.selectedId : undefined
+  const loadDetail = useCallback(async (id: string) => (
+    getDemoAdminHandover(id, {
+      empty,
+      missingBuilding,
+      ...(id === previewId ? { previewClaimId, foundItemId } : {}),
+    })
+  ), [empty, missingBuilding, previewClaimId, foundItemId, previewId])
+
+  return (
+    <AdminHandoversPage
+      state={state}
+      filter={filter}
+      loadDetail={loadDetail}
+      getFilterHref={(status) => getAdminHandoversPath(status, demoRoot, empty || missingBuilding ? scenario : undefined)}
+      onRefresh={() => setState(readList())}
+      demoControl={demoControl}
+    />
   )
 }
 

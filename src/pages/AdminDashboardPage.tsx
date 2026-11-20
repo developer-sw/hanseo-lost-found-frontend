@@ -41,7 +41,7 @@ const itemNoticeCopy: Partial<Record<NoticeStatus, { title?: string; description
   unavailable: { description: '서버 연동 후 권한과 습득물 목록을 확인할 수 있습니다.' },
 }
 
-const claimsAccessCopy: typeof itemNoticeCopy = {
+const accessCopy: typeof itemNoticeCopy = {
   loading: { title: '관리자 권한을 확인하는 중입니다.' },
   error: { title: '관리자 접속 상태를 확인하지 못했습니다.' },
   unavailable: { description: '서버 연동 후 관리자 권한을 확인할 수 있습니다.' },
@@ -52,10 +52,10 @@ const countFormat = new Intl.NumberFormat('ko-KR')
 export function AdminDashboardNotice({ status, onRetry, resource = 'summary' }: {
   status: NoticeStatus
   onRetry: () => void
-  resource?: 'summary' | 'items' | 'claims'
+  resource?: 'summary' | 'items' | 'access'
 }) {
   const { title, description, icon } = notices[status]
-  const copy = resource === 'claims' ? claimsAccessCopy[status] : resource === 'items' ? itemNoticeCopy[status] : undefined
+  const copy = resource === 'access' ? accessCopy[status] : resource === 'items' ? itemNoticeCopy[status] : undefined
 
   return (
     <section className="admin-dashboard-notice" aria-labelledby="admin-dashboard-notice-title">
@@ -99,10 +99,7 @@ function AdminQuickLinks({ getHref }: Pick<AdminDashboardPageProps, 'getHref'>) 
             <a className="admin-quick-link" href={getHref(section)}>
               <span className="admin-quick-link__icon"><Icon name={icon} size={21} /></span>
               <div>
-                <div className="admin-quick-link__heading">
-                  <h3>{label}</h3>
-                  {section === 'handovers' && <span>준비 중</span>}
-                </div>
+                <h3>{label}</h3>
                 <p>{description}</p>
               </div>
             </a>

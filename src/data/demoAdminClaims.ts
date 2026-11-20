@@ -136,6 +136,12 @@ export function getDemoClaimHandoverPreview(foundItemId: string, claimId: string
 
   const preview = reviewDemoAdminClaim(group, claimId, 'approve')
   if (preview.result.status !== 'approved') return undefined
+  const claim = preview.group.claims.find(({ id }) => id === claimId)
+  if (!claim) return undefined
 
-  return { item: preview.group.item, handover: preview.result.handover }
+  return {
+    item: preview.group.item,
+    handover: preview.result.handover,
+    claim: { id: claim.id, applicantName: claim.applicant.name, status: preview.result.claimStatus },
+  }
 }

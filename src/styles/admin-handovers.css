@@ -1,0 +1,642 @@
+.admin-handovers {
+  display: grid;
+  gap: clamp(1rem, 2.2vw, 1.6rem);
+  min-inline-size: 0;
+}
+
+.admin-handovers__heading,
+.admin-handovers__overview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem 1rem;
+}
+
+.admin-handovers__heading > button {
+  min-block-size: 2.75rem;
+}
+
+.admin-handovers__heading > button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.admin-handovers__summary h2,
+.admin-handovers__overview h2 {
+  color: var(--text);
+  font-size: clamp(1.16rem, 2.35vw, 1.45rem);
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.admin-handovers__summary h2 {
+  margin-block-end: 0.7rem;
+}
+
+.admin-handovers__stats,
+.admin-handovers__list,
+.admin-handover-timeline {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-handovers__stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.admin-handover-stat {
+  --handover-stat-border: #d8e9dd;
+  --handover-stat-bg: #f1f8f3;
+  --handover-stat-icon: #dcefe2;
+  --handover-stat-accent: #145637;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.25rem 0.7rem;
+  min-inline-size: 0;
+  padding: clamp(0.65rem, 1.7vw, 1.12rem);
+  border: 1px solid var(--handover-stat-border);
+  border-radius: 0.95rem;
+  background: var(--handover-stat-bg);
+  color: var(--handover-stat-accent);
+}
+
+.admin-handover-stat[data-stat='ongoing'] {
+  --handover-stat-border: #eedfb8;
+  --handover-stat-bg: #fff8e8;
+  --handover-stat-icon: #f8e9c5;
+  --handover-stat-accent: #674610;
+}
+
+.admin-handover-stat[data-stat='done'] {
+  --handover-stat-border: #dfe8e2;
+  --handover-stat-bg: #f4f7f5;
+  --handover-stat-icon: #e5ede8;
+  --handover-stat-accent: #375545;
+}
+
+.admin-handover-stat__icon,
+.admin-handover-timeline__marker {
+  display: grid;
+  flex: none;
+  place-items: center;
+}
+
+.admin-handover-stat__icon {
+  grid-row: span 2;
+  inline-size: clamp(2rem, 3.5vw, 2.75rem);
+  aspect-ratio: 1;
+  border-radius: 0.7rem;
+  background: var(--handover-stat-icon);
+}
+
+.admin-handover-stat__icon svg {
+  inline-size: clamp(1rem, 2.4vw, 1.3rem);
+  block-size: auto;
+}
+
+.admin-handover-stat__label {
+  font-size: clamp(0.83rem, 1.6vw, 0.97rem);
+  font-weight: 720;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.admin-handover-stat strong {
+  font-size: clamp(1.35rem, 3vw, 2.1rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.admin-handover-stat strong span {
+  margin-inline-start: 0.12rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.admin-handovers__overview {
+  margin-block-end: 0.8rem;
+}
+
+.admin-handovers__list {
+  gap: 0.75rem;
+}
+
+.admin-handover-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1.22fr) minmax(0, 1.38fr) minmax(0, 1.12fr);
+  align-items: start;
+  gap: 0.9rem clamp(0.75rem, 1.5vw, 1.3rem);
+  min-inline-size: 0;
+  padding: clamp(0.9rem, 1.7vw, 1.25rem);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(17 61 37 / 5%);
+  overflow-wrap: anywhere;
+}
+
+.admin-handover-card__item,
+.admin-handover-detail__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+
+.admin-handover-photo {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  inline-size: clamp(3.3rem, 5vw, 4.75rem);
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #f0f8f2;
+  color: var(--green-dark);
+  object-fit: cover;
+}
+
+.admin-handover-photo img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.admin-handover-card__info {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  min-inline-size: 0;
+}
+
+.admin-handover-card__info h3,
+.admin-handover-detail__item h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1rem, 1.9vw, 1.22rem);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.admin-handover-card__info p,
+.admin-handover-detail__item p {
+  color: var(--muted);
+  font-size: 0.825rem;
+}
+
+.admin-handover-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.55rem;
+}
+
+.admin-handover-card__source {
+  color: var(--green);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.admin-handover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid #d7e8dd;
+  border-radius: 100vmax;
+  background: #eef8f0;
+  color: #165537;
+  font-size: 0.8125rem;
+  font-weight: 750;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.admin-handover-badge svg {
+  flex: none;
+}
+
+.admin-handover-badge[data-status='WAITING'] {
+  border-color: #f0e2ba;
+  background: #fff8e7;
+  color: #714b13;
+}
+
+.admin-handover-badge[data-status='PLACE_SET'] {
+  border-color: #bddbc8;
+  background: #e6f5eb;
+  color: #145a38;
+}
+
+.admin-handover-badge[data-status='DONE'] {
+  border-color: var(--green-dark);
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.admin-handover-card dl,
+.admin-handover-detail__facts {
+  display: grid;
+  gap: 0.45rem;
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.admin-handover-card dl > div,
+.admin-handover-detail__facts > div {
+  display: grid;
+  gap: 0.15rem;
+  align-items: baseline;
+  min-inline-size: 0;
+}
+
+.admin-handover-card dt,
+.admin-handover-detail__facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 680;
+}
+
+.admin-handover-card dd,
+.admin-handover-detail__facts dd {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.admin-handover-card__info dl > div {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.2rem 0.5rem;
+}
+
+.admin-handover-card__actions {
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 0.65rem;
+  min-inline-size: 0;
+}
+
+.admin-handover-card__actions button,
+.admin-handover-dialog__actions button {
+  min-block-size: 2.75rem;
+  padding-inline: 0.85rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.admin-handovers__preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.45rem 0.75rem;
+  min-inline-size: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d1e6d8;
+  border-radius: 0.75rem;
+  background: #edf8f0;
+  color: #17583a;
+  font-size: 0.875rem;
+}
+
+.admin-handovers__preview svg,
+.admin-handovers__read-only svg {
+  flex: none;
+}
+
+.admin-handovers__read-only {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+:root:has(.admin-handover-dialog[open]) {
+  overflow: hidden;
+}
+
+.admin-handover-dialog {
+  --handover-dialog-gutter: clamp(0.75rem, 3vw, 1.5rem);
+  --handover-dialog-padding: clamp(0.9rem, 2.6vw, 1.5rem);
+  position: fixed;
+  inset: 0;
+  inline-size: min(46rem, calc(100% - 2 * var(--handover-dialog-gutter)));
+  max-block-size: calc(100dvh - 2 * var(--handover-dialog-gutter));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 1.125rem 3.5rem rgb(17 35 24 / 24%);
+}
+
+.admin-handover-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-handover-dialog::backdrop {
+  background: rgb(17 35 24 / 58%);
+}
+
+.admin-handover-dialog__header,
+.admin-handover-dialog__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem var(--handover-dialog-padding);
+}
+
+.admin-handover-dialog__header {
+  justify-content: space-between;
+  border-block-end: 1px solid var(--line);
+}
+
+.admin-handover-dialog__header h2 {
+  color: var(--green-dark);
+  font-size: clamp(1.18rem, 3.6vw, 1.5rem);
+  line-height: 1.3;
+}
+
+.admin-handover-dialog__close {
+  display: grid;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: #fff;
+  color: var(--green-dark);
+}
+
+.admin-handover-dialog__close:hover {
+  background: var(--mint);
+}
+
+.admin-handover-dialog__body {
+  display: grid;
+  gap: 0.85rem;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--handover-dialog-padding);
+  overflow-wrap: anywhere;
+}
+
+.admin-handover-dialog__body .admin-handover-photo {
+  inline-size: clamp(4.4rem, 11vw, 7rem);
+}
+
+.admin-handover-detail,
+.admin-handover-detail__journey {
+  display: grid;
+  gap: 0.85rem;
+  min-inline-size: 0;
+}
+
+.admin-handover-detail__journey {
+  gap: 0.45rem;
+}
+
+.admin-handover-detail__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.admin-handover-detail__item {
+  padding: 0.8rem;
+  border: 1px solid #e0ebe3;
+  border-radius: 0.8rem;
+  background: #f8fbf9;
+}
+
+.admin-handover-detail__item > div + div {
+  display: grid;
+  justify-items: start;
+  gap: 0.3rem;
+  min-inline-size: 0;
+}
+
+.admin-handover-dialog__sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.admin-handover-detail__section {
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+  min-inline-size: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.admin-handover-detail :is(.admin-handover-detail__section, .admin-handover-detail__heading) h3 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 0.97rem;
+  line-height: 1.3;
+}
+
+.admin-handover-detail__receipt-note {
+  color: var(--green-dark);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.admin-handover-detail__facts > div {
+  grid-template-columns: minmax(5rem, max-content) minmax(0, 1fr);
+  gap: 0.15rem 0.5rem;
+}
+
+.admin-handover-timeline {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.18rem;
+  padding: 0.7rem 0.35rem;
+  border: 1px solid #dceadd;
+  border-radius: 0.8rem;
+  background: #f6faf7;
+}
+
+.admin-handover-timeline li {
+  --step-fg: #4e6157;
+  --step-bg: #e8efea;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  min-inline-size: 0;
+  color: var(--step-fg);
+  font-size: clamp(0.74rem, 2.6vw, 0.9rem);
+  text-align: center;
+  word-break: keep-all;
+}
+
+.admin-handover-timeline li:not(:last-child)::after {
+  position: absolute;
+  inset-block-start: 0.85rem;
+  inset-inline-start: calc(50% + 1.1rem);
+  inset-inline-end: calc(-50% + 1.1rem);
+  block-size: 2px;
+  border-radius: 2px;
+  background: #d6e4d9;
+  content: '';
+}
+
+.admin-handover-timeline li[data-state='complete'] {
+  --step-fg: #1d5d3e;
+  --step-bg: #dcefe2;
+}
+
+.admin-handover-timeline li[data-state='complete']::after {
+  background: #aacdb6;
+}
+
+.admin-handover-timeline li[data-state='current'] {
+  --step-fg: #6c4710;
+  --step-bg: #f9e9bf;
+}
+
+.admin-handover-timeline__marker {
+  inline-size: 1.8rem;
+  aspect-ratio: 1;
+  margin-block-end: 0.15rem;
+  border-radius: 50%;
+  background: var(--step-bg);
+  font-weight: 750;
+}
+
+.admin-handover-timeline__state {
+  font-size: clamp(0.68rem, 2.15vw, 0.78rem);
+}
+
+.admin-handover-dialog__actions {
+  flex-wrap: wrap;
+  justify-content: end;
+  border-block-start: 1px solid var(--line);
+}
+
+@media (min-width: 1131px) {
+  .admin-handover-card :is(.admin-handover-card__owner, .admin-handover-card__progress, .admin-handover-card__receipt) > div {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.15rem 0.5rem;
+  }
+}
+
+@media (max-width: 1130px) {
+  .admin-handover-card {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-handover-card__item {
+    grid-column: 1 / -1;
+    padding-block-end: 0.65rem;
+    border-block-end: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 590px) {
+  .admin-handovers {
+    gap: 0.9rem;
+  }
+
+  .admin-handovers__heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem 0.55rem;
+  }
+
+  .admin-handovers__heading > div {
+    display: contents;
+  }
+
+  .admin-handovers__heading.admin-dashboard__heading p {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .admin-handovers__heading > button {
+    grid-area: 1 / 2;
+    padding-inline: 0.7rem;
+    font-size: 0.875rem;
+  }
+
+  .admin-handover-stat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-handover-stat__icon {
+    grid-row: auto;
+    margin-block-end: 0.1rem;
+    border-radius: 0.55rem;
+  }
+
+  .admin-handover-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .admin-handover-card :is(.admin-handover-card__owner, .admin-handover-card__progress, .admin-handover-card__receipt) > div {
+    grid-template-columns: minmax(5.2rem, max-content) minmax(0, 1fr);
+    gap: 0.15rem 0.6rem;
+  }
+
+  .admin-handover-card__actions {
+    justify-items: stretch;
+  }
+
+  .admin-handovers .admin-handovers__filters ul {
+    gap: 0.3rem;
+  }
+
+  .admin-handovers .admin-handovers__filters a {
+    min-inline-size: 2.75rem;
+    padding-inline: 0.42rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-handover-dialog__actions button {
+    flex: 1;
+  }
+
+  .admin-handover-dialog__sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-handover-detail__item .admin-handover-detail__facts > div {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  .admin-handover-dialog__header,
+  .admin-handover-dialog__actions {
+    padding-block: 0.65rem;
+  }
+}
+
+@media (max-width: 355px) {
+  .admin-handover-stat {
+    padding-inline: 0.5rem;
+  }
+}

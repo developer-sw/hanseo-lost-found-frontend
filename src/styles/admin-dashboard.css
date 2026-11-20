@@ -244,25 +244,11 @@
   color: var(--green);
 }
 
-.admin-quick-link__heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.45rem;
+.admin-quick-link h3 {
   margin-block: 0.05rem 0.25rem;
-}
-
-.admin-quick-link__heading h3 {
-  margin: 0;
   color: var(--green-dark);
   font-size: 1rem;
   line-height: 1.35;
-}
-
-.admin-quick-link__heading span {
-  color: var(--muted);
-  font-size: 0.8125rem;
-  white-space: nowrap;
 }
 
 .admin-quick-link p {

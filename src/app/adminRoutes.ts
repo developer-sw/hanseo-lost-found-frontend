@@ -1,5 +1,6 @@
 import type { IconName } from '../components/Icon'
 import { ADMIN_ITEM_STATUSES } from '../data/adminItemStatuses'
+import type { AdminHandoverFilter, AdminHandoversQuery } from '../types/adminHandovers'
 import type { AdminFoundItem, AdminItemStatusFilter } from '../types/adminItems'
 import type { FoundItemStatus } from '../types/foundItem'
 
@@ -16,10 +17,6 @@ const adminSections = {
 export type AdminSection = keyof typeof adminSections
 export const ADMIN_SECTIONS = Object.values(adminSections)
 
-export function getAdminSectionDetails(section: AdminSection) {
-  return adminSections[section]
-}
-
 export function getAdminPath(section: AdminSection, base = ADMIN_ROOT, params?: URLSearchParams) {
   const path = `${base}${adminSections[section].segment}`
   return params?.size ? `${path}?${params}` : path
@@ -29,6 +26,23 @@ export function getAdminHandoverPath(foundItemId: string, handoverId?: string) {
   const params = new URLSearchParams({ foundItemId })
   if (handoverId) params.set('handoverId', handoverId)
   return getAdminPath('handovers', ADMIN_ROOT, params)
+}
+
+export function getAdminHandoversQuery(params: URLSearchParams): AdminHandoversQuery {
+  const status = params.get('status')
+  const filter = status === 'all' || status === 'WAITING' || status === 'PLACE_SET' || status === 'DONE' ? status : 'ongoing'
+  return {
+    filter,
+    foundItemId: params.get('foundItemId') ?? undefined,
+    handoverId: params.get('handoverId') ?? undefined,
+  }
+}
+
+export function getAdminHandoversPath(filter: AdminHandoverFilter, base = ADMIN_ROOT, scenario?: string) {
+  const params = new URLSearchParams()
+  if (filter !== 'ongoing') params.set('status', filter)
+  if (scenario) params.set('scenario', scenario)
+  return getAdminPath('handovers', base, params)
 }
 
 export function getAdminSection(pathname: string, base = ADMIN_ROOT): AdminSection | undefined {
