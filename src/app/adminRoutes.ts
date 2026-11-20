@@ -1,4 +1,7 @@
 import type { IconName } from '../components/Icon'
+import { ADMIN_ITEM_STATUSES } from '../data/adminItemStatuses'
+import type { AdminFoundItem, AdminItemStatusFilter } from '../types/adminItems'
+import type { FoundItemStatus } from '../types/foundItem'
 
 export const ADMIN_ROOT = '/admin'
 export const ADMIN_LOGIN_PATH = '/account?role=admin'
@@ -17,11 +20,39 @@ export function getAdminSectionDetails(section: AdminSection) {
   return adminSections[section]
 }
 
-export function getAdminPath(section: AdminSection, base = ADMIN_ROOT) {
-  return `${base}${adminSections[section].segment}`
+export function getAdminPath(section: AdminSection, base = ADMIN_ROOT, params?: URLSearchParams) {
+  const path = `${base}${adminSections[section].segment}`
+  return params?.size ? `${path}?${params}` : path
 }
 
 export function getAdminSection(pathname: string, base = ADMIN_ROOT): AdminSection | undefined {
   const path = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
   return ADMIN_SECTIONS.find(({ segment }) => path === `${base}${segment}`)?.id
+}
+
+export function getAdminItemStatusFilter(value: string | null): AdminItemStatusFilter {
+  return ADMIN_ITEM_STATUSES.find(({ status }) => status === value)?.status ?? 'all'
+}
+
+export function getAdminItemsPath(filter: AdminItemStatusFilter, base = ADMIN_ROOT, scenario?: string) {
+  const params = new URLSearchParams()
+  if (filter !== 'all') params.set('status', filter)
+  if (scenario) params.set('scenario', scenario)
+  return getAdminPath('items', base, params)
+}
+
+export function getAdminItemWorkSection(status: FoundItemStatus) {
+  if (status === 'CLAIM_REQUESTED') return 'claims'
+  if (status === 'AWAITING_PICKUP') return 'handovers'
+}
+
+export function getAdminItemAction(item: AdminFoundItem, base = ADMIN_ROOT) {
+  const section = getAdminItemWorkSection(item.status)
+  if (!section) return undefined
+
+  const params = new URLSearchParams({ foundItemId: item.id, status: item.status })
+  return {
+    href: getAdminPath(section, base, params),
+    label: section === 'claims' ? '신청 검토하기' : '전달 현황 보기',
+  }
 }

@@ -7,12 +7,7 @@ import type { FoundItem, FoundItemDetail } from '../types/foundItem'
 
 export { CATEGORY_LABELS } from './categories'
 
-const demoStartedAt = Date.now()
 const hourInMs = 60 * 60 * 1000
-
-function hoursBeforeDemo(hours: number) {
-  return new Date(demoStartedAt - hours * hourInMs).toISOString()
-}
 
 export const demoFoundItemDetails: readonly FoundItemDetail[] = [
   {
@@ -22,7 +17,7 @@ export const demoFoundItemDetails: readonly FoundItemDetail[] = [
     building: '인문사회관',
     locationDetail: '2층',
     foundAt: '2026-11-17T05:40:00.000Z',
-    registeredAt: hoursBeforeDemo(6),
+    registeredAt: '2026-11-19T10:00:00.000Z',
     image: airpodsImage,
     status: 'STORED',
     description: '흰색 충전 케이스와 이어버드가 함께 있습니다.',
@@ -34,7 +29,7 @@ export const demoFoundItemDetails: readonly FoundItemDetail[] = [
     building: '학생회관',
     locationDetail: '1층',
     foundAt: '2026-11-18T01:30:00.000Z',
-    registeredAt: hoursBeforeDemo(9),
+    registeredAt: '2026-11-19T07:00:00.000Z',
     image: walletImage,
     status: 'AWAITING_PICKUP',
     description: '덮개에 금색 단추가 달린 검정색 지갑입니다.',
@@ -46,7 +41,7 @@ export const demoFoundItemDetails: readonly FoundItemDetail[] = [
     building: '도서관',
     locationDetail: '3층',
     foundAt: '2026-11-18T00:10:00.000Z',
-    registeredAt: hoursBeforeDemo(12),
+    registeredAt: '2026-11-19T04:00:00.000Z',
     image: tumblerImage,
     status: 'CLAIMED',
   },
@@ -57,7 +52,7 @@ export const demoFoundItemDetails: readonly FoundItemDetail[] = [
     building: '연암도서관',
     locationDetail: '1층 열람실',
     foundAt: '2026-11-18T02:15:00.000Z',
-    registeredAt: hoursBeforeDemo(15),
+    registeredAt: '2026-11-19T01:00:00.000Z',
     image: wirelessEarbudsImage,
     status: 'CLAIM_REQUESTED',
     description: '흰색 이어버드 두 개와 둥근 충전 케이스가 함께 있습니다.',
@@ -69,7 +64,7 @@ export const demoFoundItemDetails: readonly FoundItemDetail[] = [
     building: '기타',
     locationDetail: '정문 근처',
     foundAt: '2026-11-16T07:20:00.000Z',
-    registeredAt: hoursBeforeDemo(18),
+    registeredAt: '2026-11-18T22:00:00.000Z',
     image: earbudsCaseImage,
     status: 'STORED',
     description: '검정색 충전 케이스이며 이어버드는 들어 있지 않습니다.',

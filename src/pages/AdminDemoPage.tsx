@@ -1,6 +1,8 @@
-import { type AdminSection } from '../app/adminRoutes'
+import { getAdminItemAction, getAdminItemsPath, getAdminItemStatusFilter, getAdminItemWorkSection, getAdminPath, type AdminSection } from '../app/adminRoutes'
 import { getDemoAdminSummary } from '../data/demoAdminDashboard'
-import type { AdminDashboardSummaryResult } from '../types/adminDashboard'
+import { getDemoAdminItem, getDemoAdminItems } from '../data/demoAdminItems'
+import { AdminDashboardPage } from './AdminDashboardPage'
+import { AdminItemsPage } from './AdminItemsPage'
 import { AdminWorkspace } from './AdminPage'
 
 const demoRoot = '/admin/demo'
@@ -17,28 +19,55 @@ function getScenario(value: string | null): DemoScenario {
   return value === 'empty' || value === 'loading' || value === 'error' ? value : 'sample'
 }
 
+async function loadDemoDetail(id: string) {
+  return getDemoAdminItem(id)
+}
+
 export default function AdminDemoPage({ section, params }: { section: AdminSection; params: URLSearchParams }) {
   const scenario = getScenario(params.get('scenario'))
-  const state: AdminDashboardSummaryResult | { status: 'loading' } = scenario === 'sample' || scenario === 'empty'
-    ? { status: 'ready', summary: getDemoAdminSummary({ empty: scenario === 'empty' }) }
-    : { status: scenario }
+  const filter = getAdminItemStatusFilter(params.get('status'))
+  const getHref = (destination: AdminSection) => getAdminPath(destination, demoRoot)
+  const pending = scenario === 'loading' || scenario === 'error' ? { status: scenario } as const : undefined
+  const source = { empty: scenario === 'empty' }
+  const demoControl = (
+    <form className="admin-dashboard__demo-control" action={getHref(section)} method="get">
+      {section === 'items' && filter !== 'all' && <input type="hidden" name="status" value={filter} />}
+      <label htmlFor="admin-demo-scenario">데모 상태</label>
+      <select id="admin-demo-scenario" name="scenario" defaultValue={scenario}>
+        {Object.entries(scenarioLabels).map(([value, label]) => (
+          <option key={value} value={value}>{section === 'items' && value === 'sample' ? '예시 목록' : label}</option>
+        ))}
+      </select>
+      <button className="secondary-link" type="submit">보기</button>
+    </form>
+  )
+
+  const requestedId = params.get('foundItemId')
+  const detail = requestedId && (section === 'claims' || section === 'handovers') ? getDemoAdminItem(requestedId) : undefined
+  const selectedItem = detail?.status === 'ready' && getAdminItemWorkSection(detail.item.status) === section ? detail.item : undefined
+  const content = section === 'dashboard' ? (
+    <AdminDashboardPage
+      state={pending ?? { status: 'ready', summary: getDemoAdminSummary(source) }}
+      getHref={getHref}
+      getItemsHref={(status) => getAdminItemsPath(status, demoRoot, source.empty ? 'empty' : undefined)}
+      onRetry={() => window.location.assign(demoRoot)}
+      demoControl={demoControl}
+    />
+  ) : section === 'items' ? (
+    <AdminItemsPage
+      state={pending ?? getDemoAdminItems(filter, source)}
+      filter={filter}
+      getFilterHref={(status) => getAdminItemsPath(status, demoRoot, scenario === 'sample' ? undefined : scenario)}
+      getAction={(item) => getAdminItemAction(item, demoRoot)}
+      loadDetail={loadDemoDetail}
+      onRetry={() => window.location.assign(getAdminItemsPath(filter, demoRoot))}
+      demoControl={demoControl}
+    />
+  ) : undefined
 
   return (
-    <AdminWorkspace
-      section={section}
-      base={demoRoot}
-      demo
-      state={state}
-      onRetry={() => window.location.assign(demoRoot)}
-      demoControl={(
-        <form className="admin-dashboard__demo-control" action={demoRoot} method="get">
-          <label htmlFor="admin-demo-scenario">데모 상태</label>
-          <select id="admin-demo-scenario" name="scenario" defaultValue={scenario}>
-            {Object.entries(scenarioLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-          <button className="secondary-link" type="submit">보기</button>
-        </form>
-      )}
-    />
+    <AdminWorkspace section={section} base={demoRoot} demo selectedItem={selectedItem}>
+      {content}
+    </AdminWorkspace>
   )
 }

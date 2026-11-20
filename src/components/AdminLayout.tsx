@@ -137,7 +137,7 @@ export function AdminLayout({ activeSection, getHref, demo, accountName, childre
           {demo && (
             <div className="admin-shell__demo-notice">
               <Icon name="info" size={21} />
-              <p><strong>데모 모드</strong> 예시 데이터로 확인하는 화면입니다. 관리자 인증은 연동 전입니다.</p>
+              <p><strong>데모 모드</strong> 예시 습득물 데이터를 표시합니다. 실제 데이터베이스와 연결되지 않았습니다. 관리자 인증은 연동 전입니다.</p>
             </div>
           )}
           {children}

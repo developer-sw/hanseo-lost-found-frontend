@@ -89,7 +89,7 @@ export function App() {
   }
 
   const adminSection = getAdminSection(pathname)
-  if (adminSection) return <AdminPage section={adminSection} />
+  if (adminSection) return <AdminPage section={adminSection} params={params} />
 
   return (
     <>
